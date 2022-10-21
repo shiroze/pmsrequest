@@ -1,0 +1,10 @@
+Order seperti cart bisa edit, hapus
+setelah mensubmit order maka data muncul ke status
+
+pada tab status menampilkan data yang belum di released atau kondisi approved saja (untuk Mandor), untuk KTU munculkan data yang sudah di approve asisten.
+
+pada bagian home, user gudang menampilkan data yang akan di release (dikeluarkan). untuk user mandor/asisten home menampilkan kategori barang yang bisa di pilih.
+
+search bar bisa di gunakan untuk mencari barang berdasarkan kata kunci (ketika posisi home)
+
+ketika sudah mencari data / memilih dari kategori search bar untuk memfilter data yang muncul
