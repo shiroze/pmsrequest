@@ -9,24 +9,34 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
+import {loadItemGroup} from '~/modules/common/service';
+import { showMessage } from 'react-native-flash-message';
+import reactotron from 'reactotron-react-native';
+import { connect } from 'react-redux';
 
 const {width, height} = Dimensions.get('window');
 const btnSize = 72;
-const iconSize = 40;
+const iconSize = 32;
 
-export default function Home (props) {
+function Home (props) {
   const {navigation} = props;
   const [search, setSearch] = useState("");
+  const [list, setList] = useState();
   const dataSource = [
     {
-      icon_name: 'droplet',
-      icon_source: 'feather',
+      icon_name: 'gas-pump',
+      icon_source: 'font-awesome-5',
       name: 'Fuel'
     },
     {
-      icon_name: 'droplet',
-      icon_source: 'feather',
+      icon_name: 'oil',
+      icon_source: 'material-community',
       name: 'Grease'
+    },
+    {
+      icon_name: 'setting',
+      icon_source: 'antdesign',
+      name: 'Spare part'
     },
     {
       icon_name: 'droplet',
@@ -34,21 +44,63 @@ export default function Home (props) {
       name: 'Oil'
     },
     {
-      icon_name: 'droplet',
+      icon_name: 'thermometer',
       icon_source: 'feather',
-      name: 'Fuel'
+      name: 'Chemical'
+    },
+    {
+      icon_name: 'tree-outline',
+      icon_source: 'material-community',
+      name: 'Fertilisers'
+    },
+    {
+      icon_name: 'shopping-bag',
+      icon_source: 'feather',
+      name: 'General Good'
     },
     {
       icon_name: 'droplet',
       icon_source: 'feather',
-      name: 'Grease'
+      name: 'Consigment'
     },
     {
-      icon_name: 'droplet',
+      icon_name: 'box',
       icon_source: 'feather',
-      name: 'Oil'
+      name: 'Packing'
     }
   ];
+
+  const fetchData = async () => {
+    try {
+      const {data} = await loadItemGroup();
+
+      // reactotron.log(data);
+
+      // data.forEach(element => {
+      //   reactotron.log(element);
+      // });
+
+      // setList(data);
+    } catch (e) {
+      showMessage({
+        message: e.code,
+        description: e.message,
+        icon: 'danger',
+        type: 'danger',
+        hideOnPress: true,
+        statusBarHeight: getStatusBarHeight()
+      });
+    }
+  }
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', async () => {
+      fetchData();
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
@@ -90,7 +142,7 @@ export default function Home (props) {
             <TouchableOpacity
               style={styles.btnItemgroup}
               key={index} 
-              onPress={()=>navigation.navigate(homeStack.view_item)}>
+              onPress={()=>navigation.navigate(homeStack.list_item, {group_name: item.name})}>
               <Icon 
                 style={styles.iconStyle}
                 name={item.icon_name}
@@ -136,7 +188,7 @@ const styles = StyleSheet.create({
   },
   iconStyle: {
     margin: 10,
-    padding: 5,
+    padding: 10,
     backgroundColor: "#d9d9d9", 
     borderRadius: 10, 
     overflow: 'hidden',
@@ -144,3 +196,5 @@ const styles = StyleSheet.create({
     borderColor: '#FFF'
   }
 });
+
+export default connect()(Home);

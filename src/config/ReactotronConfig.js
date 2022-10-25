@@ -6,7 +6,11 @@ import reactotronSaga from 'reactotron-redux-saga';
 
 if (__DEV__) {
   const tron = Reactotron.configure({host: 'localhost'}) // controls connection & communication settings
-    .useReactNative() // add all built-in react native plugins
+    .useReactNative({
+      networking: {
+        ignoreUrls: /symbolicate/
+      }
+    }) // add all built-in react native plugins
     .setAsyncStorageHandler(AsyncStorage) // Prevent Multiple Connection at Reactotron
     .use(reactotronRedux())
     .use(reactotronSaga())

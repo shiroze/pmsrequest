@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux';
 
-import authReducer from './modules/auth/reducer';
-// import categoryReducer from './modules/category/reducer';
+import authReducer from '~/modules/auth/reducer';
+import orderReducer from '~/modules/order/reducer';
 // import productReducer from './modules/product/reducer';
 // import commonReducer from './modules/common/reducer';
 // import cartReducer from './modules/cart/reducer';
@@ -16,7 +16,7 @@ import authReducer from './modules/auth/reducer';
 const rootReducers = combineReducers({
   // common: commonReducer,
   auth: authReducer,
-  // category: categoryReducer,
+  order: orderReducer,
   // product: productReducer,
   // cart: cartReducer,
   // order: orderReducer,

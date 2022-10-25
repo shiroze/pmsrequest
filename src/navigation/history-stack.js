@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import {homeStack} from '~/config/navigator';
 
 import Home from '~/screens/History/index';
-import ViewItem from '~/screens/view-item';
+import ViewItem from '~/screens/common/view-item';
 
 const Stack = createStackNavigator();
 

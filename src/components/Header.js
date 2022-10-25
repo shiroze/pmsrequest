@@ -1,20 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Dimensions, View, Text, TouchableOpacity } from 'react-native';
+import { Dimensions, View, Text, TouchableOpacity, Platform } from 'react-native';
 
 import { SearchBar, Avatar, withTheme, Icon } from '@rneui/themed';
 import reactotron from 'reactotron-react-native';
 
 const {width, height} = Dimensions.get('window');
 
-const Header = (onChangeText, value, goBack, ...rest) => {
-  reactotron.log("This Go Back Function",goBack);
+const Header = (props) => {
+  const {onChangeText, value, navigation, goBack} = props;
+  // reactotron.log(Platform.OS);
 
   return (
     <View style={{height: 72, flexDirection: 'row', backgroundColor: "#faa634", alignItems: 'center', justifyContent: 'space-evenly'}}>
       {
         goBack &&
-        <TouchableOpacity style={{marginLeft: 10}} onPress={goBack}>
+        <TouchableOpacity style={{marginLeft: 10}} onPress={() => navigation.goBack()}>
           <Icon 
             name='chevron-left'
             type='font-awesome'
@@ -22,6 +23,8 @@ const Header = (onChangeText, value, goBack, ...rest) => {
         </TouchableOpacity>
       }
       <SearchBar 
+        // platform={Platform.OS}
+        // placeholder={"{itemgrou}:{keyword} for faster search"}
         round
         lightTheme
         containerStyle={{
@@ -36,8 +39,9 @@ const Header = (onChangeText, value, goBack, ...rest) => {
           size: 24
         }}
         inputContainerStyle = {{backgroundColor:'white'}}
-        {...onChangeText}
-        {...value}
+        showCancel={true}
+        onChangeText={onChangeText}
+        value={value}
       />
       <Avatar
         size={48}
@@ -54,15 +58,13 @@ const Header = (onChangeText, value, goBack, ...rest) => {
   )
 }
 
-Header.propTypes = {
-  onChangeText: PropTypes.func,
-  value: PropTypes.string,
-  goBack: PropTypes.string
-}
+// Header.propTypes = {
+//   onChangeText: PropTypes.func,
+//   value: PropTypes.string,
+// }
 
-Header.defaultProps = {
-  onChangeText: () => {},
-  value: "",
-  goBack: "",
-};
+// Header.defaultProps = {
+//   onChangeText: () => {},
+//   value: "",
+// };
 export default withTheme(Header);

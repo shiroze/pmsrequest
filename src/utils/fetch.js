@@ -1,10 +1,8 @@
 import {isImmutable} from 'immutable';
 
-import axios from 'axios';
-import configApi from '@config/api';
+import configApi from '~/config/api';
 import reactotron from 'reactotron-react-native';
 import Axios from 'axios';
-
 
 /**
  * Post method

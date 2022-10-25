@@ -4,7 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import {homeStack} from '~/config/navigator';
 
 import Home from '~/screens/home';
-import ViewItem from '~/screens/view-item';
+import ListItem from '~/screens/common/list-item';
+import ViewItem from '~/screens/common/view-item';
 
 const Stack = createStackNavigator();
 
@@ -12,6 +13,7 @@ function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={homeStack.home} component={Home} />
+      <Stack.Screen name={homeStack.list_item} component={ListItem} />
       <Stack.Screen name={homeStack.view_item} component={ViewItem} />
     </Stack.Navigator>
   );

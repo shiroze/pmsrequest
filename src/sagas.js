@@ -1,7 +1,7 @@
 import {all} from 'redux-saga/effects';
 
 import authSaga from './modules/auth/saga';
-// import categorySaga from './modules/category/saga';
+import orderSaga from './modules/order/saga';
 // import cartSaga from './modules/cart/saga';
 // import productSaga from './modules/product/saga';
 // import commonSaga from './modules/common/saga';
@@ -20,7 +20,7 @@ export default function* rootSagas() {
     // cartSaga(),
     // categorySaga(),
     // productSaga(),
-    // orderSaga(),
+    orderSaga(),
     // vendorSaga(),
     // checkoutSaga(),
   ]);

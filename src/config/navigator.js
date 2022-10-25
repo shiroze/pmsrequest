@@ -12,6 +12,7 @@ export const mainStack = {
 
 export const homeStack = {
   home: 'Home',
+  list_item: 'ListItem',
   view_item: 'ViewItem'
 }
 

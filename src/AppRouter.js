@@ -27,7 +27,7 @@ class AppRouter extends React.Component {
         <StatusBar
           translucent
           barStyle={'dark-content'}
-          backgroundColor="transparent"
+          backgroundColor="white"
         />
         <Router />
         <FlashMessage position="top" />
