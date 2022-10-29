@@ -10,7 +10,7 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {historyStack} from '~/config/navigator';
-import {getHistory} from '~/modules/common/service';
+import {getIssue} from '~/modules/common/service';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -22,10 +22,10 @@ const ITEM_HEIGHT = (height / 5) + 30;
 
 moment.locale('id-ID');
 
-function History(props) {
+function Issue(props) {
   const {navigation, route, dispatch} = props;
-
-  const [history, setHistory] = useState([]);
+  
+  const [issue, setIssue] = useState([]);
   const [start, setStart] = useState(1);
   const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
@@ -39,7 +39,7 @@ function History(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getHistory({start, end, date_from, date_to});
+      const {data} = await getIssue({start, end, date_from, date_to});
 
       if(data.length < 50) {
         setHide(true);
@@ -47,12 +47,12 @@ function History(props) {
         setHide(false);
       }
 
-      let listData = history;
+      let listData = issue;
       let cData = listData.concat(data);
 
       reactotron.log(cData);
 
-      setHistory(cData);
+      setIssue(cData);
       setLoading(false);
     } catch (e) {
       showMessage({
@@ -68,7 +68,7 @@ function History(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(start,end);
+      // fetchData(start,end);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -76,7 +76,7 @@ function History(props) {
   }, [navigation]);
 
   React.useLayoutEffect(() => {
-    fetchData(start, end);
+    // fetchData(start, end);
   }, [start, end]);
 
   const getItemLayout = React.useCallback(
@@ -93,13 +93,10 @@ function History(props) {
         navigation.navigate(historyStack.view_history, {id: item.sivCode, dtrans: item.dtrans, createdBy: item.createdBy});
       }}
     >
-      <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{moment(item.dtrans).format('ll')}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}></Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.createdBy && item.createdBy}</Text>
-      </View>
-      <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.sivCode}</Text>
+      <Text>{item.dtrans}</Text>
+      <Text>{item.no_order}</Text>
+      <Text>{item.createdBy}</Text>
+      <Text>{item.status}</Text>
     </TouchableOpacity>,
     [],
   )
@@ -116,13 +113,13 @@ function History(props) {
       <Header {...props} />
       {
         <FlatList 
-          data={history}
+          data={issue}
           renderItem={renderItem}
           // initialNumToRender={10}
           // maxToRenderPerBatch={5}
           // getItemLayout={getItemLayout}
           ListFooterComponent={() => {
-            if(history.length > 0) {
+            if(issue.length > 0) {
               return (
                 !hide ? <TouchableOpacity style={{marginBottom: 12, alignItems: 'center'}} onPress={_nextPage}>
                   <Text style={{fontSize: 18}}>{loading ? <ActivityIndicator size={"large"} color={'#faa634'} style={{marginTop: 24}} /> : "Load more"}</Text>
@@ -199,4 +196,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(History);
+export default connect()(Issue);

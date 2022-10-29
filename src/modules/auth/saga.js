@@ -1,6 +1,9 @@
 import {put, call, select, takeEvery} from 'redux-saga/effects';
 
 import * as Actions from './constants';
+
+import {login, logout} from './service';
+
 import {handleError, handleInfo, handleSuccess} from '~/utils/message';
 
 /**

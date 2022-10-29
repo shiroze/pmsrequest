@@ -1,18 +1,18 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack';
 
-import {homeStack} from '~/config/navigator';
+import {historyStack} from '~/config/navigator';
 
 import Home from '~/screens/History/index';
-import ViewItem from '~/screens/common/view-item';
+import ViewHistory from '~/screens/History/view-history';
 
 const Stack = createStackNavigator();
 
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name={homeStack.home} component={Home} />
-      <Stack.Screen name={homeStack.view_item} component={ViewItem} />
+      <Stack.Screen name={historyStack.home} component={Home} />
+      <Stack.Screen name={historyStack.view_history} component={ViewHistory} />
     </Stack.Navigator>
   );
 }

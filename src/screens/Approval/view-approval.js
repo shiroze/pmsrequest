@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, Dimensions, FlatList, StyleSheet, Keyboard, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Dimensions, FlatList, StyleSheet, Keyboard, TouchableOpacity } from 'react-native';
 
 import { SpeedDial, Button } from '@rneui/base';
 import { Icon, Overlay } from '@rneui/themed';
@@ -9,12 +9,14 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {historyStack} from '~/config/navigator';
-import {getHistory} from '~/modules/common/service';
+import {approvalStack} from '~/config/navigator';
+import {getApprovalbyID} from '~/modules/approval/service';
+import {approveOrder} from '~/modules/approval/actions';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
 import { showMessage } from 'react-native-flash-message';
+
 import moment from 'moment/min/moment-with-locales';
 
 const {width, height} = Dimensions.get("window");
@@ -22,16 +24,16 @@ const ITEM_HEIGHT = (height / 5) + 30;
 
 moment.locale('id-ID');
 
-function History(props) {
+function ViewApproval(props) {
   const {navigation, route, dispatch} = props;
+  const {id} = route.params;
+  
+  const [list, setList] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [showView, setShowView] = useState(false);
+  const [selected, setSelected] = useState();
 
-  const [history, setHistory] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
-  const [hide, setHide] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const fetchData = async (start, end, date_from='', date_to='') => {
+  const fetchData = async (id) => {
     try {
       /**
        * @param start : start page
@@ -39,21 +41,14 @@ function History(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getHistory({start, end, date_from, date_to});
+      const {data} = await getHistorybyID({id});
 
-      if(data.length < 50) {
-        setHide(true);
-      } else {
-        setHide(false);
-      }
-
-      let listData = history;
+      let listData = list;
       let cData = listData.concat(data);
 
       reactotron.log(cData);
 
-      setHistory(cData);
-      setLoading(false);
+      setList(cData);
     } catch (e) {
       showMessage({
         message: e.code,
@@ -62,22 +57,28 @@ function History(props) {
         type: 'danger',
         hideOnPress: true
       });
-      setLoading(false);
     }
   }
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(start,end);
+      fetchData(id);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
 
-  React.useLayoutEffect(() => {
-    fetchData(start, end);
-  }, [start, end]);
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      setOpen(false);
+      setShowView(false);
+      setSelected();
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation]);
 
   const getItemLayout = React.useCallback(
     (data, index) => ({
@@ -88,59 +89,49 @@ function History(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={styles.itemCard} 
+    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: '#c7ffdc'}]} 
       onPress={() => {
-        navigation.navigate(historyStack.view_history, {id: item.sivCode, dtrans: item.dtrans, createdBy: item.createdBy});
+        navigation.navigate(approvalStack.detail_approval, {id, itemCode: item.itemCode});
       }}
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{moment(item.dtrans).format('ll')}</Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}></Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.createdBy && item.createdBy}</Text>
+        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
+          {" "+item.uomCode}
+        </Text>
       </View>
-      <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.sivCode}</Text>
+      <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.itemDescription}</Text>
+      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: </Text>
     </TouchableOpacity>,
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
-  const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
-    setLoading(true);
-  }
-
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header {...props} />
-      {
-        <FlatList 
-          data={history}
-          renderItem={renderItem}
-          // initialNumToRender={10}
-          // maxToRenderPerBatch={5}
-          // getItemLayout={getItemLayout}
-          ListFooterComponent={() => {
-            if(history.length > 0) {
-              return (
-                !hide ? <TouchableOpacity style={{marginBottom: 12, alignItems: 'center'}} onPress={_nextPage}>
-                  <Text style={{fontSize: 18}}>{loading ? <ActivityIndicator size={"large"} color={'#faa634'} style={{marginTop: 24}} /> : "Load more"}</Text>
-                </TouchableOpacity> : <View style={{marginBottom: 12, alignItems: 'center'}}>
-                  <Text style={{fontSize: 18}}>Reach end of list</Text>
-                </View>
-              )
-            } else {
-              return (
-                <View style={{marginTop:18, marginBottom: 12, alignItems: 'center'}}>
-                  <Text style={{fontSize: 20}}>No data Found</Text>
-                </View>
-              )
-            }
-          }}
-          // keyExtractor={keyExtractor}
-        />
-      }
+      <Header goBack={true} {...props} />
+      <ViewItem />
+      <View style={[{margin: 14, padding: 8, flexDirection: 'row', borderBottomWidth: .5}]}>
+        <View style={{width: '25%'}}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Tanggal</Text>
+          <Text style={styles.fontStyle}>{moment(dtrans).format('ll')}</Text>
+        </View>
+        <View style={{width: '40%'}}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>No Order</Text>
+          <Text>{id}</Text>
+        </View>
+        <View style={{width: '25%'}}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Pemohon</Text>
+          <Text>{createdBy}</Text>
+        </View>
+      </View>
+      <FlatList 
+        data={list}
+        renderItem={renderItem}
+      />
     </Container>
   )
 }
@@ -165,10 +156,10 @@ const styles = StyleSheet.create({
     paddingVertical: 2
   },
   itemCard: {
-    flex:1, 
     margin: 14, 
     padding: 8,
     backgroundColor: '#FFF',
+    height: (height * 0.07) + 22, 
     borderRadius: 10, 
     overflow: 'hidden',
     borderWidth: 1, 
@@ -183,7 +174,7 @@ const styles = StyleSheet.create({
     elevation: 5
   },
   textStyle: {
-    fontSize: 12,
+    fontSize: 14,
     lineHeight: 24
   },
   btnStyle: {
@@ -199,4 +190,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(History);
+export default connect()(ViewApproval);

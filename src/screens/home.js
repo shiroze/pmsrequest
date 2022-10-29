@@ -20,7 +20,7 @@ const iconSize = 32;
 
 function Home (props) {
   const {navigation} = props;
-  const [search, setSearch] = useState("");
+  
   const [list, setList] = useState();
   const dataSource = [
     {
@@ -61,7 +61,7 @@ function Home (props) {
     {
       icon_name: 'droplet',
       icon_source: 'feather',
-      name: 'Consigment'
+      name: 'Consignment'
     },
     {
       icon_name: 'box',
@@ -73,22 +73,35 @@ function Home (props) {
   const fetchData = async () => {
     try {
       const {data} = await loadItemGroup();
-
+      let newData = [];
       // reactotron.log(data);
 
-      // data.forEach(element => {
-      //   reactotron.log(element);
-      // });
+      data.forEach(element => {
+        dataSource.map((item,index) => {
+          if(item.name.toUpperCase() == element.groupName) {
+            var newItem = {
+              name: element.groupName,
+              count: element.subgroupCount,
+              icon_name: item.icon_name,
+              icon_source: item.icon_source
+            };
+            // reactotron.log(newItem);
 
-      // setList(data);
+            newData.push(newItem);
+          }
+        });
+      });
+
+      // reactotron.log(newData);
+
+      setList(newData);
     } catch (e) {
       showMessage({
         message: e.code,
         description: e.message,
         icon: 'danger',
         type: 'danger',
-        hideOnPress: true,
-        statusBarHeight: getStatusBarHeight()
+        hideOnPress: true
       });
     }
   }
@@ -104,7 +117,7 @@ function Home (props) {
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header onChangeText={setSearch} value={search} />
+      <Header {...props} />
       <View style={{margin: "4%"}}>
         <View style={styles.identityCard}>
           <Avatar
@@ -130,7 +143,7 @@ function Home (props) {
         <Text style={styles.headTitle}>Kategori</Text>
         <FlatList
           style={{marginTop: 20}}
-          data={dataSource}
+          data={list}
           numColumns={3}
           horizontal={false}
           columnWrapperStyle={{
@@ -142,7 +155,7 @@ function Home (props) {
             <TouchableOpacity
               style={styles.btnItemgroup}
               key={index} 
-              onPress={()=>navigation.navigate(homeStack.list_item, {group_name: item.name})}>
+              onPress={()=>navigation.navigate(homeStack.list_item, {group_name: item.name, sub_count: item.count})}>
               <Icon 
                 style={styles.iconStyle}
                 name={item.icon_name}
@@ -183,6 +196,8 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   btnItemgroup: {
+    margin: 8,
+    width: width * 0.3,
     alignItems: 'center', 
     justifyContent: 'center',
   },

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Dimensions, ImageBackground, Keyboard, KeyboardAvoidingView, TouchableWithoutFeedback, View } from 'react-native';
-import {Button, Input} from '@rneui/base';
+import { Button, Input } from '@rneui/base';
 import { ThemeConsumer } from '@rneui/themed';
 
 import { connect } from 'react-redux';
@@ -39,6 +39,7 @@ function Login(props) {
                   onChangeText={(text) => setPassword(text)}
                 />
                 <Button
+                  radius={20}
                   onPress={_signIn}
                   title={'Sign In'}
                   style={{marginTop: 20}}

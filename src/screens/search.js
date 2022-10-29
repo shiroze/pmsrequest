@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import { Text, View, StyleSheet, Dimensions, Keyboard, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 
-import { Avatar, Icon, Input, SearchBar } from '@rneui/themed';
+import { Avatar, Icon, Input } from '@rneui/themed';
 
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
@@ -17,13 +17,11 @@ import { connect } from 'react-redux';
 const {height, width} = Dimensions.get('window');
 const ITEM_HEIGHT = (height / 5) + 30;
 
-function ListItem(props) {
+function Search(props) {
   const {navigation} = props;
   const {group_name, sub_count} = props.route.params;
 
-  const [filter, setFilter] = useState("");
   const [list, setList] = useState([]);
-  const [extra, setExtra] = useState();
   const [subList, setSubList] = useState([]);
   const [start, setStart] = useState(1);
   const [end, setEnd] = useState(50);
@@ -107,13 +105,6 @@ function ListItem(props) {
     }
   }, [start, end]);
 
-  const filterData = (keyword) => {
-    setFilter(keyword);
-    let fData = list.filter(val => val.itemDescription.includes(keyword) || val.itemCode.includes(keyword));
-
-    setExtra(fData);
-  }
-
   const getItemLayout = React.useCallback(
     (data, index) => ({
       length: ITEM_HEIGHT,
@@ -128,48 +119,28 @@ function ListItem(props) {
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>PNS</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
-          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.stock || 0}</Text>
-          {" "+item.uomCode}
+        <Text style={[styles.fontStyle, {width: '25%'}]}>
+          {(item.stock || 0)+" "+item.uomCode}
         </Text>
       </View>
-      <Text style={[styles.fontStyle, {flexGrow: 1, fontWeight: 'bold'}]} numberOfLines={2}>Nama : {item.itemDescription}</Text>
+      <Text style={[styles.fontStyle, {flexGrow: 1}]} numberOfLines={2}>Nama : {item.itemDescription}</Text>
     </TouchableOpacity>,
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
   
-  const footerComponent = () => {
-    if(list.length > 0) {
-      return (
-        !hide ? <TouchableOpacity style={{marginBottom: 12, alignItems: 'center'}} onPress={_nextPage}>
-          <Text style={{fontSize: 18}}>{loading ? <ActivityIndicator size={"large"} color={'#faa634'} style={{marginTop: 24}} /> : "Load more"}</Text>
-        </TouchableOpacity> : <View style={{marginBottom: 12, alignItems: 'center'}}>
-          <Text style={{fontSize: 18}}>Reach end of list</Text>
-        </View>
-      )
-    } else {
-      return (
-        <View style={{marginTop:18, marginBottom: 12, alignItems: 'center'}}>
-          <Text style={{fontSize: 20}}>No data Found</Text>
-        </View>
-      )
-    }
-  }
-
   const _nextPage = async () => {
     setStart(end+1);
     setEnd(end+50);
     setLoading(true);
-    setFilter("");
   }
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header goBack={true} title={group_name} {...props} />
-      {/* <View style={[styles.borderStyle, {borderBottomWidth: .875, padding: 10}]}>
+      <Header goBack={true} {...props} />
+      <View style={[styles.borderStyle, {borderBottomWidth: .875, padding: 10}]}>
         <Text style={{fontWeight: 'bold', fontSize: 16}}>{group_name}</Text>
-      </View> */}
+      </View>
       {
         (subList.length > 0 && sub_count > 0) && (
           <View style={[styles.borderStyle, {borderBottomWidth: .875, padding: 10}]}>
@@ -193,23 +164,30 @@ function ListItem(props) {
           </View>
         )
       }
-      <SearchBar
-        placeholder='Input keyword'
-        round
-        onChangeText={filterData}
-        value={filter}
-        containerStyle={styles.containerStyle}
-        inputContainerStyle={styles.inputContainerStyle}
-        inputStyle={styles.inputStyle}
-      />
       {
         <FlatList 
-          data={extra ? extra : list}
+          data={list}
           renderItem={renderItem}
-          // maxToRenderPerBatch={8}
-          // getItemLayout={getItemLayout}
-          ListFooterComponent={footerComponent}
-          // keyExtractor={keyExtractor}
+          maxToRenderPerBatch={8}
+          getItemLayout={getItemLayout}
+          ListFooterComponent={() => {
+            if(list.length > 0) {
+              return (
+                !hide ? <TouchableOpacity style={{marginBottom: 12, alignItems: 'center'}} onPress={_nextPage}>
+                  <Text style={{fontSize: 18}}>{loading ? <ActivityIndicator size={"large"} color={'#faa634'} style={{marginTop: 24}} /> : "Load more"}</Text>
+                </TouchableOpacity> : <View style={{marginBottom: 12, alignItems: 'center'}}>
+                  <Text style={{fontSize: 18}}>Reach end of list</Text>
+                </View>
+              )
+            } else {
+              return (
+                <View style={{marginTop:18, marginBottom: 12, alignItems: 'center'}}>
+                  <Text style={{fontSize: 20}}>No data Found</Text>
+                </View>
+              )
+            }
+          }}
+          keyExtractor={keyExtractor}
         />
       }
     </Container>
@@ -252,20 +230,7 @@ const styles = StyleSheet.create({
     shadowOpacity:  0.18,
     shadowRadius: 4.59,
     elevation: 5
-  },
-  containerStyle: {
-    // width: width * 0.85,
-    backgroundColor:'#faa634',
-    borderTopWidth: 0,
-    borderBottomWidth: 0,
-  },
-  inputContainerStyle: {
-    backgroundColor:'#FFF', 
-    height: 32,
-  },
-  inputStyle: {
-    fontSize: 14
   }
 });
 
-export default connect()(ListItem);
+export default connect()(Search);

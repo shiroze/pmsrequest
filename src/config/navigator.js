@@ -1,6 +1,8 @@
 export const rootSwitch = {
   login: 'LoginScreen',
   main: 'MainStack',
+  search: 'SearchScreen',
+  account: 'AccountScreen'
 };
 
 export const mainStack = {
@@ -18,15 +20,14 @@ export const homeStack = {
 
 export const orderStack = {
   home: 'Order',
-  view_item: 'ViewItem'
 }
 
 export const historyStack = {
   home: 'History',
-  view_item: 'ViewItem'
+  view_history: 'ViewHistory'
 }
 
 export const approvalStack = {
   home: 'Approval',
-  view_item: 'ViewItem'
+  view_approval: 'ViewApproval'
 }

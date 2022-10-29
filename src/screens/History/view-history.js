@@ -9,27 +9,57 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {removeFromCart, emptyCart} from '~/modules/order/actions';
+import {getHistorybyID} from '~/modules/common/service';
 import {orderSelector} from '~/modules/order/selectors';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
+import moment from 'moment/min/moment-with-locales';
 
 const {width, height} = Dimensions.get("window");
 const ITEM_HEIGHT = (height / 5) + 30;
 
-function Order(props) {
-  const {navigation, route, dispatch, orderCart} = props;
+moment.locale('id-ID');
+
+function ViewHistory(props) {
+  const {navigation, route, dispatch} = props;
+  const {id, dtrans, createdBy} = route.params;
   
   const [list, setList] = useState([]);
   const [open, setOpen] = useState(false);
   const [showView, setShowView] = useState(false);
   const [selected, setSelected] = useState();
 
+  const fetchData = async (id) => {
+    try {
+      /**
+       * @param start : start page
+       * @param end : end page
+       * @param date_from : tanggal mulai
+       * @param date_to : tanggal akhir
+       */
+      const {data} = await getHistorybyID({id});
+
+      let listData = list;
+      let cData = listData.concat(data);
+
+      reactotron.log(cData);
+
+      setList(cData);
+    } catch (e) {
+      showMessage({
+        message: e.code,
+        description: e.message,
+        icon: 'danger',
+        type: 'danger',
+        hideOnPress: true
+      });
+    }
+  }
+
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      setList(orderCart);
-      reactotron.log(orderCart);
+      fetchData(id);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -51,31 +81,22 @@ function Order(props) {
     setShowView(!showView);
   };
   
-  const ViewOrder = () => {
-    let array = orderCart;
-    let viewData = orderCart[selected];
+  const ViewItem = () => {
+    let viewData = list[selected];
 
     return (
       <Overlay isVisible={showView} animationType={'slide'} onBackdropPress={toggleView} overlayStyle={{backgroundColor: '#FFF', padding: 8, height: '60%', width: '80%'}}>
         {viewData ?
           (
-            <View style={{flex:1, margin: 20}}>
+            <View style={{flex: 1, margin: 20}}>
               <Text style={styles.textStyle}>{"Kode: " + viewData.itemCode}</Text>
               <Text style={styles.textStyle}>{"Nama: " + viewData.itemDescription}</Text>
               <Text style={styles.textStyle}>{"Satuan: " + viewData.uomCode}</Text>
-              <Text style={styles.textStyle}>{"Kuantiti Tersedia: "+viewData.stock}</Text>
               <Text style={styles.textStyle}>{"Kuantiti Diminta: "+viewData.qty}</Text>
-              <Text style={styles.textStyle}>{"Keterangan Penggunaan: "+viewData.keterangan}</Text>
-              <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center'}}>
-                <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '40%'}]}
-                  onPress={() => {
-                    array.splice(selected, 1);
-                    dispatch(removeFromCart({payload:array}))
-                  }}>
-                  <Text style={{color: '#FFF'}}>Hapus</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.btnStyle, {width: '40%'}]} onPress={toggleView}>
-                  <Text style={{color: '#FFF'}}>Batal</Text>
+              <Text style={styles.textStyle}>{"Keterangan Penggunaan: "}</Text>
+              <View style={{position: 'absolute', left: 0, right: 0, bottom: 0}}>
+                <TouchableOpacity style={[styles.btnStyle, {width: '60%'}]} onPress={toggleView}>
+                  <Text style={{color: '#FFF'}}>Tutup</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -101,7 +122,7 @@ function Order(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={styles.itemCard} 
+    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: '#c7ffdc'}]} 
       onPress={() => {
         setSelected(index);
         setTimeout(() => {
@@ -111,7 +132,7 @@ function Order(props) {
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{"{Lokasi}"}</Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}></Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
         <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
@@ -119,7 +140,7 @@ function Order(props) {
         </Text>
       </View>
       <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.itemDescription}</Text>
-      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: {item.keterangan}</Text>
+      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: </Text>
     </TouchableOpacity>,
     [],
   )
@@ -127,43 +148,26 @@ function Order(props) {
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header {...props} />
-      <ViewOrder />
-      {
-        orderCart.length == 0 ? (
-          <View style={{flex:1, width, height, alignItems: 'center', justifyContent: 'center'}}>
-            <Text>Order Cart is Empty add Item first</Text>
-          </View>
-        ) : (
-          <FlatList 
-            data={orderCart}
-            renderItem={renderItem}
-            ListFooterComponent={() => (
-              <Button 
-                radius={20}
-                title={"Submit"}
-                buttonStyle={{backgroundColor: '#098438'}}
-                containerStyle={{margin: 30}}
-              />
-            )}
-          />
-        )
-      }
-      <SpeedDial
-        isOpen={open}
-        icon={{ name: 'edit', color: '#FFF'}}
-        openIcon={{ name: 'close', color: '#FFF'}}
-        onOpen={() => setOpen(!open)}
-        onClose={() => setOpen(!open)}
-      >
-        <SpeedDial.Action
-          icon={{ name: 'delete', color: '#FFF' }}
-          title="Empty Order"
-          onPress={() => 
-            dispatch(emptyCart())
-          }
-        />
-      </SpeedDial>
+      <Header goBack={true} {...props} />
+      <ViewItem />
+      <View style={[{margin: 14, padding: 8, flexDirection: 'row', borderBottomWidth: .5}]}>
+        <View style={{width: '25%'}}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Tanggal</Text>
+          <Text style={styles.fontStyle}>{moment(dtrans).format('ll')}</Text>
+        </View>
+        <View style={{width: '40%'}}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>No Order</Text>
+          <Text>{id}</Text>
+        </View>
+        <View style={{width: '25%'}}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Pemohon</Text>
+          <Text>{createdBy}</Text>
+        </View>
+      </View>
+      <FlatList 
+        data={list}
+        renderItem={renderItem}
+      />
     </Container>
   )
 }
@@ -188,7 +192,6 @@ const styles = StyleSheet.create({
     paddingVertical: 2
   },
   itemCard: {
-    flex:1, 
     margin: 14, 
     padding: 8,
     backgroundColor: '#FFF',
@@ -223,10 +226,4 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = (state) => {
-  return {
-    orderCart: orderSelector(state).toJS(),
-  };
-};
-
-export default connect(mapStateToProps)(Order);
+export default connect()(ViewHistory);

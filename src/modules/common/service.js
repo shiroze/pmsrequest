@@ -17,3 +17,6 @@ export const getMaterial = ({groupName, subgroupName, query, start, end}) =>
 
 export const getMaterialbyID = ({groupCode}) => 
   request.post('/getMaterialbyID', {groupCode});
+
+export const getHistory = ({start, end, date_from, date_to}) => request.post('/getHistory', {start, end, date_from, date_to});
+export const getHistorybyID = ({id}) => request.post('/getHistorybyID', {id});

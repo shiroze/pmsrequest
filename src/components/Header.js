@@ -1,59 +1,74 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import { Dimensions, View, Text, TouchableOpacity, Platform } from 'react-native';
 
-import { SearchBar, Avatar, withTheme, Icon } from '@rneui/themed';
+import { Avatar, withTheme, Icon } from '@rneui/themed';
+import { getDefaultHeaderHeight, getHeaderTitle, useHeaderHeight } from '@react-navigation/elements';
+import { useSafeAreaFrame, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
+
+import SearchBar from './SearchBar';
+
+import {rootSwitch} from '~/config/navigator';
 import reactotron from 'reactotron-react-native';
 
 const {width, height} = Dimensions.get('window');
 
 const Header = (props) => {
-  const {onChangeText, value, navigation, goBack} = props;
-  // reactotron.log(Platform.OS);
+  const {navigation, route, goBack, title} = props;
+  
+  const frame = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
+  const headerHeight = getDefaultHeaderHeight(frame, false, insets.top) - getStatusBarHeight();
+  let Headertitle = "";
+
+  const [search, setSearch] = useState("");
+  switch (route.name) {
+    case "ListItem":
+      Headertitle = title;
+      break;
+    case "ViewItem":
+      Headertitle = title;
+      break;
+    default:
+      Headertitle = route.name;
+      break;
+  }
 
   return (
-    <View style={{height: 72, flexDirection: 'row', backgroundColor: "#faa634", alignItems: 'center', justifyContent: 'space-evenly'}}>
+    <View style={{height: headerHeight,flexDirection: 'row', backgroundColor: "#faa634", alignItems: 'center'}}>
       {
         goBack &&
-        <TouchableOpacity style={{marginLeft: 10}} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={{marginLeft: 8}} onPress={() => navigation.goBack()}>
           <Icon 
-            name='chevron-left'
-            type='font-awesome'
+            name='arrow-left'
+            type='material-community'
+            color={'#FFF'}
+            size={24}
           />
         </TouchableOpacity>
       }
-      <SearchBar 
-        // platform={Platform.OS}
-        // placeholder={"{itemgrou}:{keyword} for faster search"}
-        round
-        lightTheme
-        containerStyle={{
-          width: width * 0.80,
-          backgroundColor:'transparent',
-          borderTopWidth: 0,
-          borderBottomWidth: 0,
-        }}
-        searchIcon={{
-          name: 'search',
-          type: 'font-awesome',
-          size: 24
-        }}
-        inputContainerStyle = {{backgroundColor:'white'}}
-        showCancel={true}
-        onChangeText={onChangeText}
-        value={value}
-      />
-      <Avatar
-        size={48}
-        rounded
-        icon={{
-          name: 'person-outline',
-          type: 'material',
-          color: '#098438',
-          size: 40
-        }}
-        containerStyle={{ backgroundColor: '#FFF', marginRight: 10 }}
-      />
+      {route.name == "Home" ? (
+        <>
+          <SearchBar {...props} />
+          <Avatar
+            size={40}
+            rounded
+            icon={{
+              name: 'person-outline',
+              type: 'material',
+              color: '#098438',
+              size: 32
+            }}
+            containerStyle={{ backgroundColor: '#FFF', marginLeft: 12 }}
+            onPress={() => navigation.navigate(rootSwitch.account)}
+          />
+        </>
+      ) : (
+        <View style={{marginLeft: 24, width: width * 0.85}}>
+          <Text style={{fontSize: 22, fontWeight: 'bold', color: '#FFF'}} numberOfLines={1}>{Headertitle}</Text>
+        </View>
+      )}
     </View>
   )
 }

@@ -3,6 +3,7 @@ import {fromJS} from 'immutable';
 
 export const rootOrder = (state) => state.order;
 
-export const orderSelector = createSelector(rootOrder, (data) =>
-  data.get('orderCart'),
+export const orderSelector = createSelector(
+  rootOrder, 
+  (data) => data.getIn(['orderCart']) || fromJS([]),
 );

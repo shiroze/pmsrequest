@@ -8,6 +8,7 @@ import FlashMessage from 'react-native-flash-message';
 
 import {ThemeProvider} from '@rneui/themed';
 import Router from '~/navigation/root-nav';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 class AppRouter extends React.Component {
   constructor(props) {
@@ -30,7 +31,7 @@ class AppRouter extends React.Component {
           backgroundColor="white"
         />
         <Router />
-        <FlashMessage position="top" />
+        <FlashMessage position="top" statusBarHeight={getStatusBarHeight()} />
       </ThemeProvider>
     );
   }

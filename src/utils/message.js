@@ -1,4 +1,5 @@
 import {showMessage} from 'react-native-flash-message';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 export function handleError(e) {
   showMessage({
@@ -7,6 +8,7 @@ export function handleError(e) {
     // description: e.message,
     type: 'danger',
     duration: 3000,
+    statusBarHeight: getStatusBarHeight()
   });
 }
 
@@ -16,6 +18,7 @@ export function handleSuccess(e) {
     message: e.message,
     // description: e.message,
     type: 'success',
+    statusBarHeight: getStatusBarHeight()
   });
 }
 
@@ -26,6 +29,7 @@ export function handleWarning(e) {
     // description: e.message,
     type: 'warning',
     duration: 3000,
+    statusBarHeight: getStatusBarHeight()
   });
 }
 

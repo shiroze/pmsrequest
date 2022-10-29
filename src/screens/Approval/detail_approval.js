@@ -9,35 +9,43 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {getMaterialbyID} from '~/modules/common/service';
-import {addToCart} from '~/modules/order/actions';
-import {orderSelector} from '~/modules/order/selectors';
+import {getApprovalDetail} from '~/modules/approval/service';
+import {rejectItem} from '~/modules/approval/actions';
 
+import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
 import { showMessage } from 'react-native-flash-message';
 
-import { connect } from 'react-redux';
+import moment from 'moment/min/moment-with-locales';
 
 const {height, width} = Dimensions.get('window');
 
-function ViewItem(props) {
+function DetailApproval(props) {
   const {navigation, route, dispatch, orderCart} = props;
-  const {item_code} = route.params;
+  const {id, item_code} = route.params;
 
   const [data, setData] = useState();
   const [visible, setVisible] = useState(false);
   const [qty, setQty] = useState(0);
   const [keterangan, setKeterangan] = useState("");
 
-  const fetchData = async (groupCode) => {
+  const fetchData = async (id, itemCode) => {
     try {
       /**
-       * @param groupCode : group name
+       * @param start : start page
+       * @param end : end page
+       * @param date_from : tanggal mulai
+       * @param date_to : tanggal akhir
        */
-      const {data} = await getMaterialbyID({groupCode});
-      
-      setData(data[0]);
-    } catch (error) {
+      const {data} = await getApprovalDetail({id, itemCode});
+
+      let listData = list;
+      let cData = listData.concat(data);
+
+      reactotron.log(cData);
+
+      setList(cData);
+    } catch (e) {
       showMessage({
         message: e.code,
         description: e.message,
@@ -50,7 +58,7 @@ function ViewItem(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(item_code);
+      fetchData(id, item_code);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -61,40 +69,27 @@ function ViewItem(props) {
     setVisible(!visible);
   };
 
-  const add_to_cart = item => {
-    if (orderCart.some(val => item.itemCode === val.itemCode)) {
-      /**
-       * Membuang duplikat item
-       */
-      const newArrayList = [];
-      orderCart.forEach(obj => {
-        if (!newArrayList.some(o => o.itemCode === obj.itemCode)) {
-          newArrayList.push({...obj});
-        }
-      });
+  const Save = item => {
+    /**
+     * Update data Qty & keterangan
+     * Replace old data
+     */
+    var index = orderCart.findIndex(o => o.itemCode == item.itemCode);
+    orderCart[index].qty = item.qty;
+    orderCart[index].keterangan = item.keterangan;
+  }
 
-      /**
-       * Update Qty jika barang yang sama dipilih
-       * Timpa Qty lama
-       */
-      var index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
-      newArrayList[index].qty = item.qty;
-
-      dispatch(addToCart({payload:newArrayList}));
-    } else {
-      let listData = orderCart;
-      let cData = listData.concat(item);
-
-      reactotron.log("Tidak ada yang sama");
-
-      dispatch(addToCart({payload:cData}));
-    }
+  const Reject = item => {
+    /**
+     * Reject 1 Item and go Back
+     */
+    dispatch(rejectItem({itemCode: item.itemCode}));
   };
 
-  const OrderConfirmation = () => {
+  const OrderConfirmation = (type) => {
     return (
       <Overlay isVisible={visible} animationType={'slide'} onBackdropPress={toggleOverlay} overlayStyle={{backgroundColor: '#FFF', padding: 8, height: '60%', width: '80%'}}>
-        {data && 
+        {(data && type == 1) ?
           <View style={{flex:1, margin: 20}}>
             <Text style={styles.textStyle}>{"Kode: " + data.itemCode}</Text>
             <Text style={styles.textStyle}>{"Nama: " + data.itemDescription}</Text>
@@ -102,10 +97,7 @@ function ViewItem(props) {
             <Text style={styles.textStyle}>{"Kuantiti Tersedia: " + data.stock}</Text>
             <Text style={styles.textStyle}>{"Kuantiti Diminta: "+qty}</Text>
             <Text style={styles.textStyle}>{"Keterangan Penggunaan: "+keterangan}</Text>
-            <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center', marginTop: 18}}>
-              <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '40%'}]} onPress={toggleOverlay}>
-                <Text style={{color: '#FFF'}}>Batal</Text>
-              </TouchableOpacity>
+            <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, alignContent: 'center', marginTop: 18}}>
               <TouchableOpacity style={[styles.btnStyle, {width: '40%'}]} onPress={() => {
                 var item = {
                   itemCode: data.itemCode,
@@ -117,9 +109,31 @@ function ViewItem(props) {
                   stock: data.stock,
                   warehouse: data.warehouse
                 };
-                add_to_cart(item);
+                Save(item);
               }}>
                 <Text style={{color: '#FFF'}}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          :
+          <View style={{flex: 1, margin: 20, alignSelf: 'center'}}>
+            <Text>Dengan menekan tombol <Text style={{fontWeight: 'bold'}}>Reject</Text> item berikut akan dibatalkan:</Text>
+            <Text>{data && data.itemDescription}</Text>
+            <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, alignContent: 'center', marginTop: 18}}>
+              <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '40%'}]} onPress={() => {
+                var item = {
+                  itemCode: data.itemCode,
+                  itemDescription: data.itemDescription,
+                  uomCode: data.uomCode,
+                  groupName: data.groupName,
+                  subgroupName: data.subgroupName,
+                  qty,keterangan,
+                  stock: data.stock,
+                  warehouse: data.warehouse
+                };
+                Save(item);
+              }}>
+                <Text style={{color: '#FFF'}}>Reject</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -248,10 +262,4 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = (state) => {
-  return {
-    orderCart: orderSelector(state).toJS(),
-  };
-};
-
-export default connect(mapStateToProps)(ViewItem);
+export default connect()(DetailApproval);
