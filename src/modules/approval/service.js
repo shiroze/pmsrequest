@@ -1,17 +1,10 @@
 import request from '~/utils/fetch';
 
-/**
- * API login with email and password
- * @param username
- * @param password
- * @returns {Promise<unknown>}
- */
+export const getApproval = ({branch_id,start, end}) => request.post(branch_id,'/approval', {start, end});
+export const getApprovalbyID = ({branch_id,id}) => request.post(branch_id,'/approval/view', {id});
 
-export const getApproval = () => request.get('/aproval');
-export const getApprovalbyID = ({id}) => request.post('/approval', {id});
-export const getApprovalDetail = ({id, itemCode}) => request.post('/approval/detail', {id, itemCode});
+export const saveApprove = ({branch_id, id, username, stage}) => 
+  request.post(branch_id,'/approval/save', {id, username, stage});
 
-export const saveApprove = ({id}) => 
-  request.post('/approval/save', {id});
-
-export const saveReject = ({id, itemCode}) => request.post('/approval/decline', {id, itemCode});
+export const saveReject = ({branch_id, id, itemCode, alasan, username}) => 
+  request.post(branch_id,'/approval/decline', {id, item_code: itemCode, alasan, username});

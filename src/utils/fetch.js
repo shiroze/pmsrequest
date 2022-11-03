@@ -11,9 +11,9 @@ import Axios from 'axios';
  * @param method
  * @return {Promise<R>}
  */
-const get = (url, data, method = 'POST') => {
+const get = (branch_id, url, data, method = 'POST') => {
   return new Promise((resolve, reject) => {
-    let baseURL = configApi.API_ENDPOINT + url;
+    let baseURL = configApi.API_ENDPOINT + '/' + branch_id + configApi.ENDPOINT + url;
     Axios({
       method: 'get',
       url: baseURL,
@@ -42,9 +42,9 @@ const get = (url, data, method = 'POST') => {
  * @param method
  * @return {Promise<R>}
  */
-const post = (url, data, method = 'POST') => {
+const post = (branch_id, url, data, method = 'POST') => {
   return new Promise((resolve, reject) => {
-    let baseURL = configApi.API_ENDPOINT + url;
+    let baseURL = configApi.API_ENDPOINT + '/' + branch_id + configApi.ENDPOINT + url;
     Axios({
       method: 'post',
       url: baseURL,

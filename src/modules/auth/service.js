@@ -6,7 +6,11 @@ import request from '~/utils/fetch';
  * @param password
  * @returns {Promise<unknown>}
  */
-export const login = ({username, password}) =>
-  request.post('/login', {username, password});
+export const login = ({branch_id, username, password}) =>
+  request.post(branch_id,'/login', {username, password});
 
-export const logout = () => request.get('/logout');
+/**
+ * We Don't need logout because not save anything
+ * Clear State reducer
+ */
+// export const logout = () => request.get('/logout');

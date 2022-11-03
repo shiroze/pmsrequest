@@ -5,6 +5,7 @@ import { SearchBar, withTheme } from '@rneui/themed';
 
 import {rootSwitch} from '~/config/navigator';
 import reactotron from 'reactotron-react-native';
+import { showMessage } from 'react-native-flash-message';
 
 const {width, height} = Dimensions.get('window');
 
@@ -34,7 +35,17 @@ const CustomSearchBar = (props) => {
       showCancel={true}
       onChangeText={setSearch}
       value={search}
-      onSubmitEditing={() => navigation.navigate(rootSwitch.search, {keyword: search})}
+      onSubmitEditing={() => {
+        if(search != "") {
+          navigation.navigate(rootSwitch.search, {keyword: search})
+        } else {
+          showMessage({
+            message: "Kata kunci tidak boleh kosong",
+            type: 'danger',
+            icon: 'danger',
+          })
+        }
+      }}
       returnKeyType={'search'}
     />
   )

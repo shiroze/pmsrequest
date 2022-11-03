@@ -1,8 +1,8 @@
 export const rootSwitch = {
   login: 'LoginScreen',
   main: 'MainStack',
-  search: 'SearchScreen',
-  account: 'AccountScreen'
+  search: 'Search',
+  account: 'Account'
 };
 
 export const mainStack = {
@@ -29,5 +29,6 @@ export const historyStack = {
 
 export const approvalStack = {
   home: 'Approval',
-  view_approval: 'ViewApproval'
+  view_approval: 'ViewApproval',
+  detail_approval: 'DetailApproval'
 }

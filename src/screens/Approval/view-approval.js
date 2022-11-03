@@ -10,6 +10,7 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {approvalStack} from '~/config/navigator';
+import {authSelector, accessSelector, locationSelector} from '~/modules/auth/selectors';
 import {getApprovalbyID} from '~/modules/approval/service';
 import {approveOrder} from '~/modules/approval/actions';
 
@@ -25,30 +26,26 @@ const ITEM_HEIGHT = (height / 5) + 30;
 moment.locale('id-ID');
 
 function ViewApproval(props) {
-  const {navigation, route, dispatch} = props;
-  const {id} = route.params;
+  const {navigation, route, dispatch, auth, access, branch_id} = props;
+  const {id, dtrans, requestBy, order_status} = route.params;
   
   const [list, setList] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [showView, setShowView] = useState(false);
-  const [selected, setSelected] = useState();
 
   const fetchData = async (id) => {
     try {
       /**
-       * @param start : start page
-       * @param end : end page
-       * @param date_from : tanggal mulai
-       * @param date_to : tanggal akhir
+       * @param branch_id
+       * @param id
        */
-      const {data} = await getHistorybyID({id});
+      const {data} = await getApprovalbyID({branch_id,id});
 
-      let listData = list;
-      let cData = listData.concat(data);
+      if(data.error) {
+        throw Error(data.message);
+      } else {
+        var result = data.data;
 
-      reactotron.log(cData);
-
-      setList(cData);
+        setList(result);
+      }
     } catch (e) {
       showMessage({
         message: e.code,
@@ -69,17 +66,6 @@ function ViewApproval(props) {
     return unsubscribe;
   }, [navigation]);
 
-  React.useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
-      setOpen(false);
-      setShowView(false);
-      setSelected();
-    });
-
-    // Return the function to unsubscribe from the event so it gets removed on unmount
-    return unsubscribe;
-  }, [navigation]);
-
   const getItemLayout = React.useCallback(
     (data, index) => ({
       length: ITEM_HEIGHT,
@@ -89,31 +75,42 @@ function ViewApproval(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: '#c7ffdc'}]} 
-      onPress={() => {
-        navigation.navigate(approvalStack.detail_approval, {id, itemCode: item.itemCode});
-      }}
+    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc'}]} 
+      onPress={() => navigation.navigate(approvalStack.detail_approval, {id, item})}
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}></Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
+        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc', textAlign: 'center'}]}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
           {" "+item.uomCode}
         </Text>
       </View>
       <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.itemDescription}</Text>
-      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: </Text>
+      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: {item.keterangan}</Text>
     </TouchableOpacity>,
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
+  const approve = () => {
+    var access_right = access.filter(val => val.namaModul.includes('Warehouse'));
+    let stage=0;
+
+    if(access_right.namaSubmodul == "Approve Stage 1") {
+      stage=1;
+    } else if(access_right.namaSubmodul == "Approve Stage 2") {
+      stage=2;
+    }
+
+    dispatch(approveOrder({branch_id, id, username: auth.userName, stage}));
+    // reactotron.log(access);
+  }
+
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
       <Header goBack={true} {...props} />
-      <ViewItem />
       <View style={[{margin: 14, padding: 8, flexDirection: 'row', borderBottomWidth: .5}]}>
         <View style={{width: '25%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Tanggal</Text>
@@ -125,12 +122,21 @@ function ViewApproval(props) {
         </View>
         <View style={{width: '25%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Pemohon</Text>
-          <Text>{createdBy}</Text>
+          <Text>{requestBy}</Text>
         </View>
       </View>
       <FlatList 
         data={list}
         renderItem={renderItem}
+      />
+      <Button 
+        radius={18}
+        title={'Approve'}
+        buttonStyle={{backgroundColor: '#098438'}}
+        containerStyle={{
+          margin: 8
+        }}
+        onPress={approve}
       />
     </Container>
   )
@@ -190,4 +196,12 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(ViewApproval);
+const mapStateToProps = (state) => {
+  return {
+    auth: authSelector(state),
+    access: accessSelector(state),
+    branch_id: locationSelector(state),
+  };
+};
+
+export default connect(mapStateToProps)(ViewApproval);

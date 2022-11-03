@@ -10,6 +10,7 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {getMaterialbyID} from '~/modules/common/service';
+import {locationSelector} from '~/modules/auth/selectors';
 import {addToCart} from '~/modules/order/actions';
 import {orderSelector} from '~/modules/order/selectors';
 
@@ -21,7 +22,7 @@ import { connect } from 'react-redux';
 const {height, width} = Dimensions.get('window');
 
 function ViewItem(props) {
-  const {navigation, route, dispatch, orderCart} = props;
+  const {navigation, route, dispatch, orderCart, branch_id} = props;
   const {item_code} = route.params;
 
   const [data, setData] = useState();
@@ -34,10 +35,14 @@ function ViewItem(props) {
       /**
        * @param groupCode : group name
        */
-      const {data} = await getMaterialbyID({groupCode});
-      
-      setData(data[0]);
-    } catch (error) {
+      const {data} = await getMaterialbyID({branch_id,groupCode});
+
+      if(data.error) {
+        throw Error(data.message);
+      } else {
+        setData(data.data[0]);
+      }
+    } catch (e) {
       showMessage({
         message: e.code,
         description: e.message,
@@ -84,8 +89,6 @@ function ViewItem(props) {
     } else {
       let listData = orderCart;
       let cData = listData.concat(item);
-
-      reactotron.log("Tidak ada yang sama");
 
       dispatch(addToCart({payload:cData}));
     }
@@ -251,6 +254,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     orderCart: orderSelector(state).toJS(),
+    branch_id: locationSelector(state),
   };
 };
 

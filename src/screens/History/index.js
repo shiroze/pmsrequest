@@ -11,6 +11,7 @@ import Header from '~/components/Header';
 
 import {historyStack} from '~/config/navigator';
 import {getHistory} from '~/modules/common/service';
+import {locationSelector} from '~/modules/auth/selectors';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -23,7 +24,7 @@ const ITEM_HEIGHT = (height / 5) + 30;
 moment.locale('id-ID');
 
 function History(props) {
-  const {navigation, route, dispatch} = props;
+  const {navigation, route, dispatch, branch_id} = props;
 
   const [history, setHistory] = useState([]);
   const [start, setStart] = useState(1);
@@ -39,21 +40,30 @@ function History(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getHistory({start, end, date_from, date_to});
+      const {data} = await getHistory({branch_id,start, end, date_from, date_to});
 
-      if(data.length < 50) {
-        setHide(true);
+      if(data.error) {
+        throw Error(data.message);
       } else {
-        setHide(false);
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
+
+        if(result.length < 50) {
+          setHide(true);
+        } else {
+          setHide(false);
+        }
+
+        let listData = history;
+        let cData = listData.concat(result);
+
+        reactotron.log(cData);
+
+        setHistory(cData);
+        setLoading(false);
       }
-
-      let listData = history;
-      let cData = listData.concat(data);
-
-      reactotron.log(cData);
-
-      setHistory(cData);
-      setLoading(false);
     } catch (e) {
       showMessage({
         message: e.code,
@@ -76,7 +86,9 @@ function History(props) {
   }, [navigation]);
 
   React.useLayoutEffect(() => {
-    fetchData(start, end);
+    if(start != 1 && end != 50) {
+      fetchData(start, end);
+    }
   }, [start, end]);
 
   const getItemLayout = React.useCallback(
@@ -95,7 +107,7 @@ function History(props) {
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{moment(item.dtrans).format('ll')}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}></Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.createdBy && item.createdBy}</Text>
       </View>
@@ -199,4 +211,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(History);
+const mapStateToProps = (state) => {
+  return {
+    branch_id: locationSelector(state),
+  };
+};
+
+export default connect(mapStateToProps)(History);

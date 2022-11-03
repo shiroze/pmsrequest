@@ -10,6 +10,7 @@ import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
 import {getMaterial, loadSubGroup} from '~/modules/common/service';
+import {locationSelector} from '~/modules/auth/selectors';
 
 import reactotron from 'reactotron-react-native';
 import { connect } from 'react-redux';
@@ -18,7 +19,7 @@ const {height, width} = Dimensions.get('window');
 const ITEM_HEIGHT = (height / 5) + 30;
 
 function ListItem(props) {
-  const {navigation} = props;
+  const {navigation, branch_id} = props;
   const {group_name, sub_count} = props.route.params;
 
   const [filter, setFilter] = useState("");
@@ -39,24 +40,29 @@ function ListItem(props) {
        * @param start : start page
        * @param end : end page
        */
-      const {data} = await getMaterial({groupName,subgroupName,query,start,end});
+      const {data} = await getMaterial({branch_id,groupName,subgroupName,query,start,end});
 
-      // data.forEach(element => {
-      //   reactotron.log(element);
-      // });
-
-      if(data.length < 50) {
-        setHide(true);
+      if(data.error) {
+        throw Error(data.message);
       } else {
-        setHide(false);
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
+
+        if(result.length < 50) {
+          setHide(true);
+        } else {
+          setHide(false);
+        }
+
+        let listData = list;
+        let cData = listData.concat(result);
+
+        setList(cData);
+        setLoading(false);
       }
-
-      let listData = list;
-      let cData = listData.concat(data);
-
-      setList(cData);
-      setLoading(false);
-    } catch (error) {
+    } catch (e) {
       showMessage({
         message: e.code,
         description: e.message,
@@ -69,17 +75,33 @@ function ListItem(props) {
   }
 
   const fetchSubgroup = async (groupName) => {
-    const {data} = await loadSubGroup({groupName});
+    const {data} = await loadSubGroup({branch_id,groupName});
 
-    if(data.length > 0) {
-      setSubList(data);
-      /**
-       * Set yang lagi aktif subgroup pertama
-       */
-      setSubGroup(data[0].subGroupName);
-    } else {
-      setSubList([]);
-      setSubGroup("");
+    try {
+      if(data.error) {
+        throw Error(data.message);
+      } else {
+        var result = data.data;
+        if(result.length > 0) {
+          setSubList(result);
+          /**
+           * Set yang lagi aktif subgroup pertama
+           */
+          setSubGroup(result[0].subGroupName);
+        } else {
+          setSubList([]);
+          setSubGroup("");
+        }
+      }
+    } catch (e) {
+      showMessage({
+        message: e.code,
+        description: e.message,
+        icon: 'danger',
+        type: 'danger',
+        hideOnPress: true
+      });
+      setLoading(false);
     }
   }
 
@@ -126,7 +148,7 @@ function ListItem(props) {
     ({ item }) => <TouchableOpacity style={styles.itemCard} onPress={() => navigation.navigate(homeStack.view_item, {item_code: item.itemCode})}>
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>PNS</Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
         <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.stock || 0}</Text>
@@ -156,7 +178,6 @@ function ListItem(props) {
       )
     }
   }
-
   const _nextPage = async () => {
     setStart(end+1);
     setEnd(end+50);
@@ -268,4 +289,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(ListItem);
+const mapStateToProps = (state) => {
+  return {
+    branch_id: locationSelector(state),
+  };
+};
+
+export default connect(mapStateToProps)(ListItem);

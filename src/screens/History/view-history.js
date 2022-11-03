@@ -11,6 +11,7 @@ import Header from '~/components/Header';
 
 import {getHistorybyID} from '~/modules/common/service';
 import {orderSelector} from '~/modules/order/selectors';
+import {locationSelector} from '~/modules/auth/selectors';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -22,7 +23,7 @@ const ITEM_HEIGHT = (height / 5) + 30;
 moment.locale('id-ID');
 
 function ViewHistory(props) {
-  const {navigation, route, dispatch} = props;
+  const {navigation, route, dispatch, branch_id} = props;
   const {id, dtrans, createdBy} = route.params;
   
   const [list, setList] = useState([]);
@@ -38,14 +39,23 @@ function ViewHistory(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getHistorybyID({id});
+      const {data} = await getHistorybyID({branch_id,id});
 
-      let listData = list;
-      let cData = listData.concat(data);
+      if(data.error) {
+        throw Error(data.message);
+      } else {
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
 
-      reactotron.log(cData);
+        let listData = list;
+        let cData = listData.concat(result);
 
-      setList(cData);
+        reactotron.log(cData);
+
+        setList(cData);
+      }
     } catch (e) {
       showMessage({
         message: e.code,
@@ -226,4 +236,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(ViewHistory);
+const mapStateToProps = (state) => {
+  return {
+    branch_id: locationSelector(state),
+  };
+};
+
+export default connect(mapStateToProps)(ViewHistory);

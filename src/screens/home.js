@@ -9,17 +9,20 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
+import {authSelector, locationSelector} from '~/modules/auth/selectors';
 import {loadItemGroup} from '~/modules/common/service';
+
 import { showMessage } from 'react-native-flash-message';
-import reactotron from 'reactotron-react-native';
+
 import { connect } from 'react-redux';
+import reactotron from 'reactotron-react-native';
 
 const {width, height} = Dimensions.get('window');
 const btnSize = 72;
 const iconSize = 32;
 
 function Home (props) {
-  const {navigation} = props;
+  const {navigation, auth, branch_id} = props;
   
   const [list, setList] = useState();
   const dataSource = [
@@ -72,29 +75,36 @@ function Home (props) {
 
   const fetchData = async () => {
     try {
-      const {data} = await loadItemGroup();
+      const {data} = await loadItemGroup({branch_id});
       let newData = [];
-      // reactotron.log(data);
+      if(data.error) {
+        throw Error(data.message);
+      } else {
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
 
-      data.forEach(element => {
-        dataSource.map((item,index) => {
-          if(item.name.toUpperCase() == element.groupName) {
-            var newItem = {
-              name: element.groupName,
-              count: element.subgroupCount,
-              icon_name: item.icon_name,
-              icon_source: item.icon_source
-            };
-            // reactotron.log(newItem);
+        result.forEach(element => {
+          dataSource.map((item,index) => {
+            if(item.name.toUpperCase() == element.groupName) {
+              var newItem = {
+                name: element.groupName,
+                count: element.subgroupCount,
+                icon_name: item.icon_name,
+                icon_source: item.icon_source
+              };
+              // reactotron.log(newItem);
 
-            newData.push(newItem);
-          }
+              newData.push(newItem);
+            }
+          });
         });
-      });
 
-      // reactotron.log(newData);
+        // reactotron.log(newData);
 
-      setList(newData);
+        setList(newData);
+      }
     } catch (e) {
       showMessage({
         message: e.code,
@@ -134,10 +144,10 @@ function Home (props) {
             borderColor: '#FFF' }}
           />
           <View>
-            <Text style={styles.textWhite}>Nama : Albella Khotani</Text>
-            <Text style={styles.textWhite}>Posisi: Asistem Proses</Text>
-            <Text style={styles.textWhite}>Mill: PNS</Text>
-            <Text style={styles.textWhite}>PT: Gunung Melayu</Text>
+            <Text style={styles.textWhite}>Nama : {auth.user.userName}</Text>
+            <Text style={styles.textWhite}>Posisi: {auth.user.fullName}</Text>
+            <Text style={styles.textWhite}>Mill: {branch_id}</Text>
+            <Text style={styles.textWhite}>PT. Gunung Melayu</Text>
           </View>
         </View>
         <Text style={styles.headTitle}>Kategori</Text>
@@ -212,4 +222,14 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(Home);
+/**
+ * Mengambil informasi user kondisi login di mana
+ */
+const mapStateToProps = (state) => {
+  return {
+    auth: authSelector(state),
+    branch_id: locationSelector(state),
+  };
+};
+
+export default connect(mapStateToProps)(Home);

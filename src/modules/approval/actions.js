@@ -1,16 +1,19 @@
 import * as Actions from './constants';
 
-export function approveOrder({id}) {
+export function approveOrder({branch_id, id, username, stage}) {
   return {
     type: Actions.APPROVE_ORDER,
-    id,
+    branch_id, id, username, stage
   };
 }
 
-export function rejectItem({id, itemCode}) {
+export function rejectItem({branch_id, id, itemCode, alasan, username}) {
   return {
     type: Actions.REJECT_ITEM,
+    branch_id,
     id, 
-    itemCode
+    itemCode,
+    alasan,
+    username
   };
 }

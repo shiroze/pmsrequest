@@ -3,7 +3,7 @@ import {put, call, select, takeEvery} from 'redux-saga/effects';
 import * as Actions from './constants';
 import {saveApprove, saveReject} from './service';
 
-import {mainStack} from '~/config/navigator';
+import {approvalStack} from '~/config/navigator';
 import NavigationService from '~/utils/navigation';
 import { handleError, handleInfo, handleSuccess } from '~/utils/message';
 
@@ -14,9 +14,9 @@ import reactotron from 'reactotron-react-native';
  * @param products
  * @returns {IterableIterator<*>}
  */
-function* setApprove({id}) {
+function* setApprove({branch_id, id, username, stage}) {
   try {
-    yield call(saveApprove, {id});
+    yield call(saveApprove, {branch_id, id, username, stage});
 
     // reactotron.log(Array.isArray(products));
 
@@ -37,15 +37,15 @@ function* setApprove({id}) {
   }
 }
 
-function* setReject({id, itemCode}) {
+function* setReject({branch_id, id, itemCode, alasan, username}) {
   try {
-    yield call(saveReject, {id, itemCode});
+    yield call(saveReject, {branch_id, id, itemCode, alasan, username});
 
     // reactotron.log(Array.isArray(products));
 
     yield call(handleError, new Error('Barang berhasil reject/tolak'))
 
-    // yield call(NavigationService.navigate, mainStack.add_rent);
+    // yield call(NavigationService.navigate, approvalStack.home);
     yield call(NavigationService.goBack);
   } catch (e) {
     reactotron.log(e);
@@ -60,7 +60,7 @@ function* setReject({id, itemCode}) {
   }
 }
 
-export default function* orderSaga() {
+export default function* approvalSaga() {
   yield takeEvery(Actions.APPROVE_ORDER, setApprove);
   yield takeEvery(Actions.REJECT_ITEM, setReject);
 }

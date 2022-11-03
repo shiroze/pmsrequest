@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, Dimensions, FlatList, StyleSheet, Keyboard, TouchableOpacity } from 'react-native';
+import { View, Text, Dimensions, FlatList, StyleSheet, Keyboard, TouchableOpacity, Alert } from 'react-native';
 
 import { SpeedDial, Button } from '@rneui/base';
 import { Icon, Overlay } from '@rneui/themed';
@@ -9,8 +9,9 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {removeFromCart, emptyCart} from '~/modules/order/actions';
+import {removeFromCart, emptyCart, checkout} from '~/modules/order/actions';
 import {orderSelector} from '~/modules/order/selectors';
+import {authSelector, locationSelector} from '~/modules/auth/selectors';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -19,7 +20,7 @@ const {width, height} = Dimensions.get("window");
 const ITEM_HEIGHT = (height / 5) + 30;
 
 function Order(props) {
-  const {navigation, route, dispatch, orderCart} = props;
+  const {navigation, route, dispatch, orderCart, branch_id, auth} = props;
   
   const [list, setList] = useState([]);
   const [open, setOpen] = useState(false);
@@ -111,7 +112,7 @@ function Order(props) {
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{"{Lokasi}"}</Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
         <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
@@ -124,6 +125,21 @@ function Order(props) {
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
+
+  const submitOrder = () => {
+    Alert.alert("Confirm", "Anda yakin ingin submit Data ?",
+    [
+      {
+        text: "OK",
+        onPress: () => dispatch(checkout({branch_id,username: auth.user.userName,cart: orderCart})),
+      },
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel"),
+        style: "cancel"
+      }
+    ])
+  }
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
@@ -144,6 +160,7 @@ function Order(props) {
                 title={"Submit"}
                 buttonStyle={{backgroundColor: '#098438'}}
                 containerStyle={{margin: 30}}
+                onPress={submitOrder}
               />
             )}
           />
@@ -226,6 +243,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     orderCart: orderSelector(state).toJS(),
+    auth: authSelector(state),
+    branch_id: locationSelector(state)
   };
 };
 

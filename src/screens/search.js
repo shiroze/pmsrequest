@@ -9,7 +9,8 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
-import {getMaterial, loadSubGroup} from '~/modules/common/service';
+import {searchMaterial, loadSubGroup} from '~/modules/common/service';
+import {locationSelector} from '~/modules/auth/selectors';
 
 import reactotron from 'reactotron-react-native';
 import { connect } from 'react-redux';
@@ -18,8 +19,8 @@ const {height, width} = Dimensions.get('window');
 const ITEM_HEIGHT = (height / 5) + 30;
 
 function Search(props) {
-  const {navigation} = props;
-  const {group_name, sub_count} = props.route.params;
+  const {navigation, branch_id} = props;
+  const {keyword} = props.route.params;
 
   const [list, setList] = useState([]);
   const [subList, setSubList] = useState([]);
@@ -29,7 +30,7 @@ function Search(props) {
   const [subgroupName, setSubGroup] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (groupName, subgroupName, start, end, query='') => {
+  const fetchData = async (start, end) => {
     try {
       /**
        * @param groupName : group name
@@ -37,23 +38,31 @@ function Search(props) {
        * @param start : start page
        * @param end : end page
        */
-      const {data} = await getMaterial({groupName,subgroupName,query,start,end});
-
-      // data.forEach(element => {
-      //   reactotron.log(element);
-      // });
-
-      if(data.length < 50) {
-        setHide(true);
+      const {data} = await searchMaterial({branch_id,query: keyword,start,end});
+      if(data.error) {
+        throw Error(data.message);
       } else {
-        setHide(false);
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
+
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+
+        if(result.length < 50) {
+          setHide(true);
+        } else {
+          setHide(false);
+        }
+
+        let listData = list;
+        let cData = listData.concat(result);
+
+        setList(cData);
+        setLoading(false);
       }
-
-      let listData = list;
-      let cData = listData.concat(data);
-
-      setList(cData);
-      setLoading(false);
     } catch (error) {
       showMessage({
         message: e.code,
@@ -66,42 +75,21 @@ function Search(props) {
     }
   }
 
-  const fetchSubgroup = async (groupName) => {
-    const {data} = await loadSubGroup({groupName});
-
-    if(data.length > 0) {
-      setSubList(data);
-      /**
-       * Set yang lagi aktif subgroup pertama
-       */
-      setSubGroup(data[0].subGroupName);
-    } else {
-      setSubList([]);
-      setSubGroup("");
-    }
-  }
-
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchSubgroup(group_name);
-      if(sub_count == 0 && subgroupName == "") {
-        fetchData(group_name, "", start, end);
-      }
+      fetchData(start, end);
     });
-    if(subgroupName && subgroupName != "" && sub_count > 0) {
-      fetchData(group_name, subgroupName, start, end);
-    }
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
-  }, [navigation, subgroupName]);
+  }, [navigation]);
 
   /**
    * Fungsi disini untuk menload data ketika pagination
    */
   React.useLayoutEffect(() => {
     if(start != 1 && end != 50) {
-      fetchData(group_name, subgroupName || "", start, end);
+      fetchData(start, end);
     }
   }, [start, end]);
 
@@ -117,10 +105,11 @@ function Search(props) {
     ({ item }) => <TouchableOpacity style={styles.itemCard} onPress={() => navigation.navigate(homeStack.view_item, {item_code: item.itemCode})}>
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>PNS</Text>
+        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>
-          {(item.stock || 0)+" "+item.uomCode}
+        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.stock || 0}</Text>
+          {" "+item.uomCode}
         </Text>
       </View>
       <Text style={[styles.fontStyle, {flexGrow: 1}]} numberOfLines={2}>Nama : {item.itemDescription}</Text>
@@ -138,32 +127,6 @@ function Search(props) {
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
       <Header goBack={true} {...props} />
-      <View style={[styles.borderStyle, {borderBottomWidth: .875, padding: 10}]}>
-        <Text style={{fontWeight: 'bold', fontSize: 16}}>{group_name}</Text>
-      </View>
-      {
-        (subList.length > 0 && sub_count > 0) && (
-          <View style={[styles.borderStyle, {borderBottomWidth: .875, padding: 10}]}>
-            <FlatList 
-              horizontal
-              data={subList}
-              renderItem={({item, index}) => (
-                <TouchableOpacity 
-                  style={[styles.pills, {backgroundColor: subgroupName == item.subGroupName ? '#008031' : '#FFF'}]}
-                  onPress={() => {
-                    setLoading(true);
-                    setList([]);
-                    setSubGroup(item.subGroupName)
-                  }}
-                >
-                  <Text style={{color: subgroupName != item.subGroupName ? '#008031' : '#FFF'}}>{item.subGroupName}</Text>
-                </TouchableOpacity>
-              )}
-              showsHorizontalScrollIndicator={false}
-            />
-          </View>
-        )
-      }
       {
         <FlatList 
           data={list}
@@ -233,4 +196,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(Search);
+const mapStateToProps = (state) => {
+  return {
+    branch_id: locationSelector(state),
+  };
+};
+
+export default connect(mapStateToProps)(Search);
