@@ -15,6 +15,15 @@ export function signIn({branch_id,username, password}) {
   };
 }
 
+export function localSignIn({branch_id, username, password}) {
+  return {
+    type: Actions.LOCAL_SIGN_IN,
+    branch_id,
+    username,
+    password,
+  };
+}
+
 export function signOut() {
   return {
     type: Actions.SIGN_OUT

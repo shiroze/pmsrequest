@@ -10,6 +10,7 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {getMaterialbyID} from '~/modules/common/service';
+// import {getMaterialbyID} from '~/modules/common/local';
 import {locationSelector} from '~/modules/auth/selectors';
 import {addToCart} from '~/modules/order/actions';
 import {orderSelector} from '~/modules/order/selectors';
@@ -30,12 +31,12 @@ function ViewItem(props) {
   const [qty, setQty] = useState(0);
   const [keterangan, setKeterangan] = useState("");
 
-  const fetchData = async (groupCode) => {
+  const fetchData = async (item_code) => {
     try {
       /**
        * @param groupCode : group name
        */
-      const {data} = await getMaterialbyID({branch_id,groupCode});
+      const {data} = await getMaterialbyID({branch_id,item_code});
 
       if(data.error) {
         throw Error(data.message);

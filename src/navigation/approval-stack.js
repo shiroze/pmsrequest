@@ -9,7 +9,7 @@ import DetailApproval from '~/screens/Approval/detail_approval';
 
 const Stack = createStackNavigator();
 
-function HomeStack() {
+function ApprovalStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={approvalStack.home} component={Home} />
@@ -19,4 +19,4 @@ function HomeStack() {
   );
 }
 
-export default HomeStack;
+export default ApprovalStack;

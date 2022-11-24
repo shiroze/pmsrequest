@@ -7,7 +7,7 @@ import Home from '~/screens/Order/index';
 
 const Stack = createStackNavigator();
 
-function HomeStack() {
+function OrderStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={orderStack.home} component={Home} />
@@ -15,4 +15,4 @@ function HomeStack() {
   );
 }
 
-export default HomeStack;
+export default OrderStack;

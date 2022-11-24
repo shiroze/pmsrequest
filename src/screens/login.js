@@ -18,12 +18,14 @@ import DropDownPicker from 'react-native-dropdown-picker';
 
 import { connect } from 'react-redux';
 
-import {signIn} from '~/modules/auth/actions';
-import { locationSelector } from '~/modules/auth/selectors';
+import {signIn, localSignIn} from '~/modules/auth/actions';
+import * as Actions from '~/modules/auth/constants';
+import { authSelector,locationSelector } from '~/modules/auth/selectors';
 
 import {handleError, handleInfo, handleSuccess} from '~/utils/message';
 
 import reactotron from 'reactotron-react-native';
+import RNFetchBlob from 'rn-fetch-blob';
 
 const {width, height} = Dimensions.get('window');
 
@@ -43,11 +45,11 @@ function Login(props) {
       label: 'Pabrik Negri Lama Dua (PND)'
     }
   ]);
-  const [conn, setConn] = useState(false);
 
   const {
     navigation,
     dispatch,
+    auth,
     location
   } = props;
 
@@ -69,6 +71,13 @@ function Login(props) {
       setValue(location);
       reactotron.log("Last Login Location : " + location);
     }
+    
+    // if(auth.pending) {
+    //   dispatch({
+    //     type: Actions.SIGN_OUT_SUCCESS
+    //   });
+    // }
+    reactotron.log(auth);
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
@@ -83,8 +92,8 @@ function Login(props) {
     } else if(value == null) {
       handleError(new Error("Cabang tidak boleh kosong"));
     } else {
-      setConn(!conn);
-      dispatch(signIn({branch_id:value, username, password}));
+      // dispatch(signIn({branch_id:value, username, password}));
+      dispatch(localSignIn({branch_id:value, username, password}));
     }
     // navigation.replace('MainStack');
   };
@@ -145,8 +154,8 @@ function Login(props) {
                 />
                 <Button
                   radius={20}
-                  loading={conn}
-                  disabled={conn}
+                  loading={auth.pending}
+                  disabled={auth.pending}
                   onPress={_signIn}
                   title={'Sign In'}
                   containerStyle={styles.buttonStyle}
@@ -228,6 +237,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => {
   return {
+    auth: authSelector(state),
     location: locationSelector(state),
   };
 };

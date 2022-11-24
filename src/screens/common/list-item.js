@@ -10,10 +10,13 @@ import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
 import {getMaterial, loadSubGroup} from '~/modules/common/service';
+// import {getMaterial, loadSubGroup} from '~/modules/common/local';
 import {locationSelector} from '~/modules/auth/selectors';
 
 import reactotron from 'reactotron-react-native';
 import { connect } from 'react-redux';
+
+import { showMessage } from 'react-native-flash-message';
 
 const {height, width} = Dimensions.get('window');
 const ITEM_HEIGHT = (height / 5) + 30;
@@ -43,6 +46,7 @@ function ListItem(props) {
       const {data} = await getMaterial({branch_id,groupName,subgroupName,query,start,end});
 
       if(data.error) {
+        setLoading(false);
         throw Error(data.message);
       } else {
         // data.forEach(element => {

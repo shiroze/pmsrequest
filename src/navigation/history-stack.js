@@ -8,7 +8,7 @@ import ViewHistory from '~/screens/History/view-history';
 
 const Stack = createStackNavigator();
 
-function HomeStack() {
+function HistoryStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={historyStack.home} component={Home} />
@@ -17,4 +17,4 @@ function HomeStack() {
   );
 }
 
-export default HomeStack;
+export default HistoryStack;

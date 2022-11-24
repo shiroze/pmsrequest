@@ -10,7 +10,8 @@ import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
 import {authSelector, locationSelector} from '~/modules/auth/selectors';
-import {loadItemGroup} from '~/modules/common/service';
+// import {loadItemGroup} from '~/modules/common/service';
+import {loadItemGroup} from '~/modules/common/local';
 
 import { showMessage } from 'react-native-flash-message';
 
@@ -32,7 +33,7 @@ function Home (props) {
       name: 'Fuel'
     },
     {
-      icon_name: 'oil',
+      icon_name: 'engine-outline',
       icon_source: 'material-community',
       name: 'Grease'
     },

@@ -20,6 +20,8 @@ export default function authReducer(state = initState, {type, payload}) {
   switch (type) {
     case Actions.SIGN_IN:
       return state.set('pending', true).set('loginError', fromJS(initError));
+    case Actions.LOCAL_SIGN_IN:
+        return state.set('pending', true).set('loginError', fromJS(initError));
     case Actions.SIGN_IN_SUCCESS:
       return state
         .set('pending', false)

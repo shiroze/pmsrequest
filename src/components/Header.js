@@ -23,6 +23,9 @@ const Header = (props) => {
   let Headertitle = "";
 
   const [search, setSearch] = useState("");
+  
+  // reactotron.log(route);
+
   switch (route.name) {
     case "ListItem":
       Headertitle = title;
@@ -48,27 +51,27 @@ const Header = (props) => {
           />
         </TouchableOpacity>
       }
-      {route.name == "Home" ? (
+      {route.name == "Home" || route.name == "KartuStock" ? (
         <>
           <SearchBar {...props} />
-          <Avatar
-            size={40}
-            rounded
-            icon={{
-              name: 'person-outline',
-              type: 'material',
-              color: '#098438',
-              size: 32
-            }}
-            containerStyle={{ backgroundColor: '#FFF', marginLeft: 12 }}
-            onPress={() => navigation.navigate(rootSwitch.account)}
-          />
         </>
       ) : (
-        <View style={{marginLeft: 24, width: width * 0.85}}>
+        <View style={{marginLeft: 24, width: goBack ? width * 0.75 : width * 0.85}}>
           <Text style={{fontSize: 22, fontWeight: 'bold', color: '#FFF'}} numberOfLines={1}>{Headertitle}</Text>
         </View>
       )}
+      <Avatar
+        size={40}
+        rounded
+        icon={{
+          name: 'person-outline',
+          type: 'material',
+          color: '#098438',
+          size: 32
+        }}
+        containerStyle={{ backgroundColor: '#FFF' }}
+        onPress={() => navigation.navigate(rootSwitch.account)}
+      />
     </View>
   )
 }

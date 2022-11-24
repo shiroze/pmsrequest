@@ -3,7 +3,7 @@ import { Dimensions } from 'react-native';
 
 import { SearchBar, withTheme } from '@rneui/themed';
 
-import {rootSwitch} from '~/config/navigator';
+import {rootSwitch,stockCardStack} from '~/config/navigator';
 import reactotron from 'reactotron-react-native';
 import { showMessage } from 'react-native-flash-message';
 
@@ -26,6 +26,7 @@ const CustomSearchBar = (props) => {
       }}
       containerStyle={{
         width: width * 0.85,
+        marginLeft: 16,
         backgroundColor:'transparent',
         borderTopWidth: 0,
         borderBottomWidth: 0,
@@ -37,7 +38,11 @@ const CustomSearchBar = (props) => {
       value={search}
       onSubmitEditing={() => {
         if(search != "") {
-          navigation.navigate(rootSwitch.search, {keyword: search})
+          if(!route.params.stock) {
+            navigation.navigate(rootSwitch.search, {keyword: search});
+          } else {
+            navigation.navigate(stockCardStack.search, {keyword: search});
+          }
         } else {
           showMessage({
             message: "Kata kunci tidak boleh kosong",
