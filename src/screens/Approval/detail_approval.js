@@ -10,8 +10,9 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {authSelector,locationSelector} from '~/modules/auth/selectors';
-import {getMaterialbyID} from '~/modules/common/service';
-import {saveItem} from '~/modules/order/actions';
+// import {getMaterialbyID} from '~/modules/common/service';
+import {getMaterialbyID} from '~/modules/common/local';
+import {saveItem, localSaveItem} from '~/modules/order/actions';
 import {rejectItem} from '~/modules/approval/actions';
 
 import { connect } from 'react-redux';
@@ -41,7 +42,7 @@ function DetailApproval(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getMaterialbyID({branch_id, groupCode: item.itemCode});
+      const {data} = await getMaterialbyID({branch_id, item_code: item.itemCode});
 
       if(data.error) {
         throw Error(data.message);
@@ -87,7 +88,7 @@ function DetailApproval(props) {
      * Replace old data
      */
     dispatch(
-      saveItem({branch_id, id, itemCode: item.itemCode, qty: item.qty, keterangan: item.keterangan})
+      localSaveItem({branch_id, id, itemCode: item.itemCode, qty: item.qty, keterangan: item.keterangan})
     );
   }
 

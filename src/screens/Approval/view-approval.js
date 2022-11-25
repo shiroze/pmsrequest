@@ -11,8 +11,9 @@ import Header from '~/components/Header';
 
 import {approvalStack} from '~/config/navigator';
 import {authSelector, accessSelector, locationSelector} from '~/modules/auth/selectors';
-import {getApprovalbyID} from '~/modules/approval/service';
-import {approveOrder} from '~/modules/approval/actions';
+// import {getApprovalbyID} from '~/modules/approval/service';
+import {getApprovalbyID} from '~/modules/approval/local';
+import {approveOrder, localApprove} from '~/modules/approval/actions';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';

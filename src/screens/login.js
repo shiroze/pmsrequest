@@ -60,7 +60,7 @@ function Login(props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {  
       if(__DEV__) {
-        setUsername('EKTU1');
+        setUsername('MANDOR1');
         setPassword('SAYAMAUBERUBAH');
         setTimeout(() => {
           setValue('PND');
@@ -77,7 +77,7 @@ function Login(props) {
     //     type: Actions.SIGN_OUT_SUCCESS
     //   });
     // }
-    reactotron.log(auth);
+    // reactotron.log(auth);
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;

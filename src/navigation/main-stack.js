@@ -27,12 +27,12 @@ function MainStack() {
           <Icon name='shopping-cart' type='feather' size={size} color={color} />
         )
       }} />
-      <Tab.Screen name={mainStack.history} component={History} options={{
+      {/* <Tab.Screen name={mainStack.history} component={History} options={{
         title: "History",
         tabBarIcon: ({color, size}) => (
           <Icon name='file-text' type='feather' size={size} color={color} />
         )
-      }} />
+      }} /> */}
       <Tab.Screen name={mainStack.approval} component={Approval} options={{
         title: "Approval",
         tabBarIcon: ({color, size}) => (

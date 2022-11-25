@@ -60,6 +60,13 @@ function* setReject({branch_id, id, itemCode, alasan, username}) {
   }
 }
 
+function* localApprove({id, username, stage}) {
+
+}
+function* localReject({id, itemCode, alasan, username}) {
+  
+}
+
 export default function* approvalSaga() {
   yield takeEvery(Actions.APPROVE_ORDER, setApprove);
   yield takeEvery(Actions.REJECT_ITEM, setReject);

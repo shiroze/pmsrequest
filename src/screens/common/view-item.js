@@ -9,8 +9,8 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {getMaterialbyID} from '~/modules/common/service';
-// import {getMaterialbyID} from '~/modules/common/local';
+// import {getMaterialbyID} from '~/modules/common/service';
+import {getMaterialbyID} from '~/modules/common/local';
 import {locationSelector} from '~/modules/auth/selectors';
 import {addToCart} from '~/modules/order/actions';
 import {orderSelector} from '~/modules/order/selectors';

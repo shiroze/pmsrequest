@@ -13,6 +13,8 @@ export default function orderReducer(state = initState, {type, payload}) {
       return state.set('orderCart', fromJS(payload));
     case Actions.CHECKOUT_SUCCESS:
       return initState;
+    case Actions.LOCAL_CHECKOUT_SUCCESS:
+      return initState;
     case Actions.EMPTY_CART:
       return initState;
     default:
