@@ -2,6 +2,7 @@ import {put, call, select, takeEvery} from 'redux-saga/effects';
 
 import * as Actions from './constants';
 import {saveApprove, saveReject} from './service';
+import {localApproveSV, localRejectSV} from './local';
 
 import {approvalStack} from '~/config/navigator';
 import NavigationService from '~/utils/navigation';
@@ -61,13 +62,37 @@ function* setReject({branch_id, id, itemCode, alasan, username}) {
 }
 
 function* localApprove({id, username, stage}) {
+  try {
+    yield call(localApproveSV, {id, username, stage});
 
+    // reactotron.log(Array.isArray(products));
+
+    yield call(handleSuccess, new Error('Order berhasil disetujui'))
+
+    // yield call(NavigationService.navigate, mainStack.add_rent);
+    yield call(NavigationService.goBack);
+  } catch (e) {
+    yield call(handleError, e.message);
+  }
 }
 function* localReject({id, itemCode, alasan, username}) {
-  
+  try {
+    yield call(localRejectSV, {id, itemCode, alasan, username});
+
+    // reactotron.log(Array.isArray(products));
+
+    yield call(handleError, new Error('Barang berhasil reject/tolak'))
+
+    // yield call(NavigationService.navigate, approvalStack.home);
+    yield call(NavigationService.goBack);
+  } catch (e) {
+    yield call(handleError, e.message);
+  }
 }
 
 export default function* approvalSaga() {
   yield takeEvery(Actions.APPROVE_ORDER, setApprove);
   yield takeEvery(Actions.REJECT_ITEM, setReject);
+  yield takeEvery(Actions.LOCAL_APPROVE_ORDER, localApprove);
+  yield takeEvery(Actions.LOCAL_REJECT_ITEM, localReject);
 }

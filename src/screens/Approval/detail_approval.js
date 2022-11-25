@@ -13,7 +13,7 @@ import {authSelector,locationSelector} from '~/modules/auth/selectors';
 // import {getMaterialbyID} from '~/modules/common/service';
 import {getMaterialbyID} from '~/modules/common/local';
 import {saveItem, localSaveItem} from '~/modules/order/actions';
-import {rejectItem} from '~/modules/approval/actions';
+import {rejectItem, localRejectItem} from '~/modules/approval/actions';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -99,7 +99,7 @@ function DetailApproval(props) {
      */
     reactotron.log("Reject Data");
     dispatch(
-      rejectItem({branch_id, id, itemCode: item.itemCode, alasan, username: auth.userName})
+      localRejectItem({branch_id, id, itemCode: item.itemCode, alasan, username: auth.userName})
     );
   };
   

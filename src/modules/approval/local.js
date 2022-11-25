@@ -65,7 +65,7 @@ export const getApprovalbyID = ({id}) => {
   })
 }
 
-export const saveApprove = ({id, username, stage}) => {
+export const localApproveSV = ({id, username, stage}) => {
   return new Promise(async (resolve, reject) => {
     var result = {
       error: false,
@@ -96,7 +96,7 @@ export const saveApprove = ({id, username, stage}) => {
   })
 }
 
-export const saveReject = ({id, itemCode, alasan, username}) => {
+export const localRejectSV = ({id, itemCode, alasan, username}) => {
   return new Promise(async (resolve, reject) => {
     var result = {
       error: false,
