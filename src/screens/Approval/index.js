@@ -10,7 +10,8 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {approvalStack} from '~/config/navigator';
-import {getApproval} from '~/modules/approval/service';
+// import {getApproval} from '~/modules/approval/service';
+import {getApproval} from '~/modules/approval/local';
 import {authSelector, locationSelector} from '~/modules/auth/selectors';
 
 import { connect } from 'react-redux';
@@ -28,12 +29,13 @@ function Approval(props) {
   const {navigation, route, dispatch, branch_id} = props;
   
   const [approval, setApproval] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
+  const [page, setPage] = useState(1);
+  // const [start, setStart] = useState(1);
+  // const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (start, end) => {
+  const fetchData = async (page) => {
     try {
       /**
        * @param start : start page
@@ -41,7 +43,7 @@ function Approval(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getApproval({branch_id,start, end});
+      const {data} = await getApproval({branch_id,page});
       if(data.error) {
         throw Error(data.message);
       } else {
@@ -55,7 +57,7 @@ function Approval(props) {
           setHide(false);
         }
 
-        if(start == 1) {
+        if(page == 1) {
           setApproval(result);
         } else {
           let listData = approval;
@@ -81,7 +83,7 @@ function Approval(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(start,end);
+      fetchData(page);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -89,10 +91,10 @@ function Approval(props) {
   }, [navigation]);
 
   React.useLayoutEffect(() => {
-    if(start != 1 && end != 50) {
-      fetchData(start, end);
+    if(page != 1) {
+      fetchData(page);
     }
-  }, [start, end]);
+  }, [page]);
 
   const getItemLayout = React.useCallback(
     (data, index) => ({
@@ -103,23 +105,31 @@ function Approval(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={styles.itemCard} 
-      onPress={() => {
-        navigation.navigate(approvalStack.view_approval, {id: item.no_order, dtrans: item.dtrans, requestBy: item.requestBy, order_status: item.order_status});
-      }}
-    >
-      <Text>{item.dtrans}</Text>
-      <Text>{item.no_order}</Text>
-      <Text>{item.requestBy}</Text>
-      <Text>{item.order_status}</Text>
-    </TouchableOpacity>,
+    ({ item, index }) => {
+      var unfrmt = item.dtrans.split('/');
+      let dtrans = unfrmt[2]+'-'+unfrmt[0]+'-'+unfrmt[1];
+
+      return (
+        <TouchableOpacity style={styles.itemCard} 
+          onPress={() => {
+            navigation.navigate(approvalStack.view_approval, {id: item.no_order, dtrans, requestBy: item.requestBy, order_status: item.order_status});
+          }}
+        >
+          <Text>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>
+          <Text>{item.no_order}</Text>
+          <Text>{item.requestBy}</Text>
+          <Text>{item.order_status}</Text>
+        </TouchableOpacity>
+      )
+    },
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
   const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
+    // setStart(end+1);
+    // setEnd(end+50);
+    setPage(page + 1);
     setLoading(true);
   }
 

@@ -3,6 +3,7 @@ import {put, call, select, takeEvery} from 'redux-saga/effects';
 import * as Actions from './constants';
 
 import {saveRequest, saveItem} from './service';
+import {localSaveReq, localSaveItem} from './local';
 
 import {mainStack, approvalStack} from '~/config/navigator';
 import NavigationService from '~/utils/navigation';
@@ -129,10 +130,54 @@ function* checkout({branch_id, username, cart}) {
   }
 }
 
+function* localsetSaveItem({id, itemCode, qty, keterangan}) {
+  try {
+    const {data} = yield call(localSaveItem, {id, itemCode, qty, keterangan});
+
+    if(!data.error) {
+      yield call(handleSuccess, new Error('Barang berhasil diupdate'))
+
+      // yield call(NavigationService.replace, approvalStack.home);
+      yield call(NavigationService.goBack);
+    } else {
+      yield call(handleError, new Error(data.message));
+    }
+  } catch (e) {
+    reactotron.log(e)
+  }
+}
+
+function* localCheckout({branch_id,username, cart}) {
+  try {
+    const {data} = yield call(localSaveReq, {
+      branch_id,
+      username,
+      cart,
+    });
+    
+    reactotron.log(data);
+
+    if(!data.error) {
+      // yield put({
+      //   type: Actions.LOCAL_CHECKOUT_SUCCESS,
+      // });
+
+      yield call(NavigationService.navigate, mainStack.approval);
+      yield call(handleSuccess, new Error('Request berhasil disubmit'));
+    } else {
+      yield call(handleError, new Error(data.message));
+    }
+  } catch (e) {
+    yield call(handleError, e);
+  }
+}
+
 export default function* orderSaga() {
   yield takeEvery(Actions.ADD_TO_CART, setBarang);
   yield takeEvery(Actions.SAVE_ITEM, setSaveItem);
+  yield takeEvery(Actions.LOCAL_SAVE_ITEM, localsetSaveItem)
   yield takeEvery(Actions.REMOVE_FROM_CART, removeBarang);
   yield takeEvery(Actions.EMPTY_CART, emptyCart);
   yield takeEvery(Actions.CHECKOUT, checkout);
+  yield takeEvery(Actions.LOCAL_CHECKOUT, localCheckout);
 }

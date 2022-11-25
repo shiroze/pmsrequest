@@ -27,12 +27,13 @@ function History(props) {
   const {navigation, route, dispatch, branch_id} = props;
 
   const [history, setHistory] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
+  const [page, setPage] = useState(1);
+  // const [start, setStart] = useState(1);
+  // const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (start, end, date_from='', date_to='') => {
+  const fetchData = async (page, date_from='', date_to='') => {
     try {
       /**
        * @param start : start page
@@ -40,7 +41,7 @@ function History(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getHistory({branch_id,start, end, date_from, date_to});
+      const {data} = await getHistory({branch_id, page, date_from, date_to});
 
       if(data.error) {
         throw Error(data.message);
@@ -87,9 +88,9 @@ function History(props) {
 
   React.useLayoutEffect(() => {
     if(start != 1 && end != 50) {
-      fetchData(start, end);
+      fetchData(page);
     }
-  }, [start, end]);
+  }, [page]);
 
   const getItemLayout = React.useCallback(
     (data, index) => ({
@@ -118,8 +119,7 @@ function History(props) {
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
   const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
+    setPage(page+1);
     setLoading(true);
   }
 

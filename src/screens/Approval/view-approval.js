@@ -11,8 +11,9 @@ import Header from '~/components/Header';
 
 import {approvalStack} from '~/config/navigator';
 import {authSelector, accessSelector, locationSelector} from '~/modules/auth/selectors';
-import {getApprovalbyID} from '~/modules/approval/service';
-import {approveOrder} from '~/modules/approval/actions';
+// import {getApprovalbyID} from '~/modules/approval/service';
+import {getApprovalbyID} from '~/modules/approval/local';
+import {approveOrder, localAppOrder} from '~/modules/approval/actions';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -28,6 +29,7 @@ moment.locale('id-ID');
 function ViewApproval(props) {
   const {navigation, route, dispatch, auth, access, branch_id} = props;
   const {id, dtrans, requestBy, order_status} = route.params;
+  var gen_allow = access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && val.allow == 'Y') || access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && val.allow == 'Y');
   
   const [list, setList] = useState([]);
 
@@ -62,6 +64,8 @@ function ViewApproval(props) {
       fetchData(id);
     });
 
+    reactotron.log(access);
+
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
@@ -76,7 +80,10 @@ function ViewApproval(props) {
   )
   const renderItem = React.useCallback(
     ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc'}]} 
-      onPress={() => navigation.navigate(approvalStack.detail_approval, {id, item})}
+      onPress={() => {
+        gen_allow ?
+        navigation.navigate(approvalStack.detail_approval, {id, item}) : reactotron.log("Not Allowed")
+      }}
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
@@ -95,16 +102,15 @@ function ViewApproval(props) {
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
   const approve = () => {
-    var access_right = access.filter(val => val.namaModul.includes('Warehouse'));
     let stage=0;
 
-    if(access_right.namaSubmodul == "Approve Stage 1") {
+    if(access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && allow == 'Y')) {
       stage=1;
-    } else if(access_right.namaSubmodul == "Approve Stage 2") {
+    } else if(access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && allow == 'Y')) {
       stage=2;
     }
 
-    dispatch(approveOrder({branch_id, id, username: auth.userName, stage}));
+    dispatch(localAppOrder({branch_id, id, username: auth.userName, stage}));
     // reactotron.log(access);
   }
 
@@ -129,15 +135,19 @@ function ViewApproval(props) {
         data={list}
         renderItem={renderItem}
       />
-      <Button 
-        radius={18}
-        title={'Approve'}
-        buttonStyle={{backgroundColor: '#098438'}}
-        containerStyle={{
-          margin: 8
-        }}
-        onPress={approve}
-      />
+      {
+        gen_allow && (
+          <Button 
+            radius={18}
+            title={'Approve'}
+            buttonStyle={{backgroundColor: '#098438'}}
+            containerStyle={{
+              margin: 8
+            }}
+            onPress={approve}
+          />
+        )
+      }
     </Container>
   )
 }

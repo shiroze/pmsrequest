@@ -9,8 +9,8 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
-import {getMaterial, loadSubGroup} from '~/modules/common/service';
-// import {getMaterial, loadSubGroup} from '~/modules/common/local';
+// import {getMaterial, loadSubGroup} from '~/modules/common/service';
+import {getMaterial, loadSubGroup} from '~/modules/common/local';
 import {locationSelector} from '~/modules/auth/selectors';
 
 import reactotron from 'reactotron-react-native';
@@ -29,21 +29,22 @@ function ListItem(props) {
   const [list, setList] = useState([]);
   const [extra, setExtra] = useState();
   const [subList, setSubList] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
+  const [page, setPage] = useState(1);
+  // const [start, setStart] = useState(1);
+  // const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
   const [subgroupName, setSubGroup] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (groupName, subgroupName, start, end, query='') => {
+  const fetchData = async (groupName, subgroupName, page, query='') => {
     try {
       /**
        * @param groupName : group name
+       * @param subgroupName : group name
+       * @param page : pagination
        * @param query : keyword
-       * @param start : start page
-       * @param end : end page
        */
-      const {data} = await getMaterial({branch_id,groupName,subgroupName,query,start,end});
+      const {data} = await getMaterial({branch_id,groupName,subgroupName,page,query});
 
       if(data.error) {
         setLoading(false);
@@ -113,11 +114,12 @@ function ListItem(props) {
     const unsubscribe = navigation.addListener('focus', async () => {
       fetchSubgroup(group_name);
       if(sub_count == 0 && subgroupName == "") {
-        fetchData(group_name, "", start, end);
+        fetchData(group_name, "", page);
       }
     });
+
     if(subgroupName && subgroupName != "" && sub_count > 0) {
-      fetchData(group_name, subgroupName, start, end);
+      fetchData(group_name, subgroupName, page);
     }
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -128,10 +130,10 @@ function ListItem(props) {
    * Fungsi disini untuk menload data ketika pagination
    */
   React.useLayoutEffect(() => {
-    if(start != 1 && end != 50) {
-      fetchData(group_name, subgroupName || "", start, end);
+    if(page != 1) {
+      fetchData(group_name, subgroupName || "", page);
     }
-  }, [start, end]);
+  }, [page]);
 
   const filterData = (keyword) => {
     setFilter(keyword);
@@ -183,8 +185,9 @@ function ListItem(props) {
     }
   }
   const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
+    // setStart(end+1);
+    // setEnd(end+50);
+    setPage(page+1);
     setLoading(true);
     setFilter("");
   }

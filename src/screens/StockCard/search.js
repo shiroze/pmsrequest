@@ -39,6 +39,7 @@ function Search(props) {
        * @param end : end page
        */
       const {data} = await searchMaterial({branch_id,query: keyword,start,end});
+      reactotron.log("Ini mencari Stock Weee !");
       if(data.error) {
         throw Error(data.message);
       } else {
@@ -78,6 +79,10 @@ function Search(props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       fetchData(start, end);
+    
+      navigation.setOptions({
+        title: `Search: ${keyword}`,
+      });
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount

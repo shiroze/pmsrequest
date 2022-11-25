@@ -10,7 +10,7 @@ import { showMessage } from 'react-native-flash-message';
 const {width, height} = Dimensions.get('window');
 
 const CustomSearchBar = (props) => {
-  const {navigation, route} = props;
+  const {navigation, route, stock} = props;
   const [search, setSearch] = useState("");
 
   return (
@@ -38,7 +38,7 @@ const CustomSearchBar = (props) => {
       value={search}
       onSubmitEditing={() => {
         if(search != "") {
-          if(!route.params.stock) {
+          if(!stock) {
             navigation.navigate(rootSwitch.search, {keyword: search});
           } else {
             navigation.navigate(stockCardStack.search, {keyword: search});

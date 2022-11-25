@@ -53,7 +53,7 @@ const Header = (props) => {
       }
       {route.name == "Home" || route.name == "KartuStock" ? (
         <>
-          <SearchBar {...props} />
+          <SearchBar {...props} stock={route.name == "Home" ? false : true} />
         </>
       ) : (
         <View style={{marginLeft: 24, width: goBack ? width * 0.75 : width * 0.85}}>

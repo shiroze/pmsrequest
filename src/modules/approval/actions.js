@@ -17,3 +17,21 @@ export function rejectItem({branch_id, id, itemCode, alasan, username}) {
     username
   };
 }
+
+
+export function localAppOrder({id, username, stage}) {
+  return {
+    type: Actions.LOCAL_APPROVE_ORDER,
+    id, username, stage
+  };
+}
+
+export function localRejectItem({id, itemCode, alasan, username}) {
+  return {
+    type: Actions.LOCAL_REJECT_ITEM,
+    id, 
+    itemCode,
+    alasan,
+    username
+  };
+}

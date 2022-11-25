@@ -13,7 +13,7 @@ const Stack = createStackNavigator();
 function StockStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
-      <Stack.Screen name={stockCardStack.home} component={Home} initialParams={{stock: true}} />
+      <Stack.Screen name={stockCardStack.home} component={Home} />
       <Stack.Screen name={stockCardStack.list_item} component={ListItem} />
       <Stack.Screen name={stockCardStack.view_card} component={ViewCard} />
       <Stack.Screen name={stockCardStack.search} component={Search} />

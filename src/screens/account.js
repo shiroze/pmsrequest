@@ -11,8 +11,25 @@ import {signOut} from '~/modules/auth/actions';
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
 
+import SQLite from 'react-native-sqlite-storage';
+import { showMessage } from 'react-native-flash-message';
+
 function Account(props) {
   const {navigation, dispatch} = props;
+
+  const reInitSQL = () => {
+    SQLite.openDatabase({name: 'db_pms.db', createFromLocation: 1}, 
+    () => {
+      showMessage({
+        message: 'Database Reset Success'
+      });
+    }, 
+    (e) => showMessage({
+      message: 'Error',
+      description: e.message,
+      type: 'danger'
+    }));
+  }
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
@@ -23,6 +40,14 @@ function Account(props) {
       }}>
         <ListItem.Content>
           <ListItem.Title>Change Password</ListItem.Title>
+        </ListItem.Content>
+        <ListItem.Chevron></ListItem.Chevron>
+      </ListItem>
+      <ListItem onPress={() => {
+        reInitSQL();
+      }}>
+        <ListItem.Content>
+          <ListItem.Title>Reset SQLite</ListItem.Title>
         </ListItem.Content>
         <ListItem.Chevron></ListItem.Chevron>
       </ListItem>

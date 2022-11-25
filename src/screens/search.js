@@ -9,7 +9,8 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 import {homeStack} from '~/config/navigator';
-import {searchMaterial, loadSubGroup} from '~/modules/common/service';
+// import {searchMaterial, loadSubGroup} from '~/modules/common/service';
+import {searchMaterial, loadSubGroup} from '~/modules/common/local';
 import {locationSelector} from '~/modules/auth/selectors';
 
 import reactotron from 'reactotron-react-native';
@@ -24,13 +25,14 @@ function Search(props) {
 
   const [list, setList] = useState([]);
   const [subList, setSubList] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
+  const [page, setPage] = useState(1);
+  // const [start, setStart] = useState(1);
+  // const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
   const [subgroupName, setSubGroup] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (start, end) => {
+  const fetchData = async (page) => {
     try {
       /**
        * @param groupName : group name
@@ -38,7 +40,7 @@ function Search(props) {
        * @param start : start page
        * @param end : end page
        */
-      const {data} = await searchMaterial({branch_id,query: keyword,start,end});
+      const {data} = await searchMaterial({branch_id, query: keyword, page});
       if(data.error) {
         throw Error(data.message);
       } else {
@@ -77,9 +79,8 @@ function Search(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(start, end);
+      fetchData(page);
     });
-
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
@@ -88,10 +89,10 @@ function Search(props) {
    * Fungsi disini untuk menload data ketika pagination
    */
   React.useLayoutEffect(() => {
-    if(start != 1 && end != 50) {
-      fetchData(start, end);
+    if(page != 1) {
+      fetchData(page);
     }
-  }, [start, end]);
+  }, [page]);
 
   const getItemLayout = React.useCallback(
     (data, index) => ({
@@ -119,8 +120,9 @@ function Search(props) {
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
   
   const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
+    // setStart(end+1);
+    // setEnd(end+50);
+    setPage(page+1);
     setLoading(true);
   }
 

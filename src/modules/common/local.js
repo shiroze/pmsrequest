@@ -74,33 +74,34 @@ export const getMaterial = async ({groupName, subgroupName, page, query}) => {
     var newSB = subgroupName || '';
   
     if(newSB == "") {
-      queryStr = `SELECT A.*, TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) GROUPNAME, 
-      TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) SUBGROUPNAME, IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+      queryStr = `SELECT A.*, 
+      CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
+      CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
+      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
       CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
       FROM PURCHASEITEM A
       LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
       LEFT JOIN STORESTOCK C ON A.ITEMCODE=C.ITEMCODE
-      WHERE GRN='N' AND 
-      TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,',')))=? AND
-      ITEMDESCRIPTION LIKE ?
-      ORDER BY ITEMDESCRIPTION
-      LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`;
+      WHERE GRN IN ('N' ,'')`;
     } else {
-      queryStr = `SELECT A.*, TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) GROUPNAME, 
-      TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) SUBGROUPNAME, IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+      queryStr = `SELECT A.*, 
+      CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
+      CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
+      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
       CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
       FROM PURCHASEITEM A
       LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
       LEFT JOIN STORESTOCK C ON A.ITEMCODE=C.ITEMCODE
-      WHERE GRN='N' AND 
-      TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,',')))=? AND
-      TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) LIKE '%${newSB}%' AND 
-      ITEMDESCRIPTION LIKE ?
-      ORDER BY ITEMDESCRIPTION
-      LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`;
+      WHERE GRN IN ('N' ,'') AND
+      TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) LIKE '%${newSB}%'`;
     }
 
-    var resp = await ExecuteQuery(`${queryStr}`, [groupName, `%${query}%`]);
+    var resp = await ExecuteQuery(`SELECT * FROM (
+        ${queryStr}
+      ) WHERE GROUPNAME=? AND
+      ITEMDESCRIPTION LIKE ?
+      ORDER BY ITEMDESCRIPTION
+      LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`, [groupName, `%${query}%`]);
 
     resp.forEach(element => {
       result.data.push({
@@ -127,13 +128,15 @@ export const getMaterialbyID = ({item_code}) => {
       message: ""
     };
     
-    var resp = await ExecuteQuery(`SELECT A.*, TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) GROUPNAME, 
-      TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) SUBGROUPNAME, IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+    var resp = await ExecuteQuery(`SELECT A.*,
+      CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
+      CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
+      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
       CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
       FROM PURCHASEITEM A
       LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
       LEFT JOIN STORESTOCK C ON A.ITEMCODE=C.ITEMCODE
-      WHERE A.ITEMCODE=? AND GRN='N'
+      WHERE A.ITEMCODE=? AND GRN IN ('N' ,'')
       ORDER BY ITEMDESCRIPTION
     `, [item_code]);
   
@@ -151,6 +154,50 @@ export const getMaterialbyID = ({item_code}) => {
     });
 
     resolve({data: result});
+  });
+}
+
+export const searchMaterial = ({query, page}) => {
+  return new Promise(async (resolve, reject) => {
+    var result = {
+      error: false,
+      data: [],
+      message: ""
+    };
+
+    var keyword = query.split(':');
+    var searchGroup = query.includes(':') ? keyword[0] : '%';
+    var searchName = query.includes(':') ? keyword[1] : query;
+    
+    var resp = await ExecuteQuery(`SELECT * FROM (
+        SELECT A.*, 
+        CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
+        CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
+        IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+        CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
+        FROM PURCHASEITEM A
+        LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
+        LEFT JOIN STORESTOCK C ON A.ITEMCODE=C.ITEMCODE
+        WHERE GRN IN ('N' ,'')
+    ) WHERE GROUPNAME LIKE ? AND (ITEMDESCRIPTION LIKE ? OR ITEMCODE LIKE ?) AND QTYONHAND > 0
+    ORDER BY ITEMDESCRIPTION
+    LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`, [`%${searchGroup}%`, `%${searchName}%`, `%${searchName}%`]);
+  
+    resp.forEach(element => {
+      result.data.push({
+        itemCode: element.ITEMCODE,
+        itemDescription: element.ITEMDESCRIPTION,
+        groupName: element.GROUPNAME,
+        subGroupName: element.SUBGROUPNAME,
+        uomCode: element.UOMCODE,
+        // C
+        stock: element.QTYONHAND,
+        warehouse: element.STORECODE
+      });
+    });
+
+    resolve({data: result});
+
   });
 }
 

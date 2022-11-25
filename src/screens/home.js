@@ -63,8 +63,8 @@ function Home (props) {
       name: 'General Good'
     },
     {
-      icon_name: 'droplet',
-      icon_source: 'feather',
+      icon_name: 'git-compare-outline',
+      icon_source: 'ionicon',
       name: 'Consignment'
     },
     {

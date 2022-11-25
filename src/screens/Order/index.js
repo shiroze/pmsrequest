@@ -9,7 +9,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {removeFromCart, emptyCart, checkout} from '~/modules/order/actions';
+import {removeFromCart, emptyCart, checkout, localCheckout} from '~/modules/order/actions';
 import {orderSelector} from '~/modules/order/selectors';
 import {authSelector, locationSelector} from '~/modules/auth/selectors';
 
@@ -30,7 +30,7 @@ function Order(props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       setList(orderCart);
-      reactotron.log(orderCart);
+      // reactotron.log(orderCart);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -131,7 +131,7 @@ function Order(props) {
     [
       {
         text: "OK",
-        onPress: () => dispatch(checkout({branch_id,username: auth.user.userName,cart: orderCart})),
+        onPress: () => dispatch(localCheckout({branch_id,username: auth.user.userName,cart: orderCart})),
       },
       {
         text: "Cancel",
