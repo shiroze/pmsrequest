@@ -14,7 +14,7 @@ export const getApproval = ({page}) => {
     var resp = await ExecuteQuery(`SELECT NO_ORDER,TGL_REQUEST,REQUEST_BY,
       CASE WHEN APPROVE_1 IS NULL THEN 'pending'
       WHEN APPROVE_1=1 AND APPROVE_2 IS NULL THEN 'asisten'
-      WHEN APPROVE_1=1 AND APPROVE_2=1 THEN 'approved'
+      WHEN APPROVE_2=1 AND RELEASED_BY IS NULL THEN 'approved'
       WHEN RELEASED_BY IS NOT NULL THEN 'released' END order_status
       FROM REQUEST
       WHERE POSTED_DATE IS NULL
@@ -75,9 +75,9 @@ export const localApproveSV = ({id, username, stage}) => {
     var query;
 
     if(stage == 1) {
-      query = `APPROVE_1=1, APPROVE_1_BY='${username}'`;
+      query = `APPROVE_1=1, APPROVE_1_BY='${username}', `;
     } else if(stage == 2) {
-      query = `APPROVE_2=1, APPROVE_2_BY='${username}'`;
+      query = `APPROVE_2=1, APPROVE_2_BY='${username}', `;
     }
 
     reactotron.log(query);

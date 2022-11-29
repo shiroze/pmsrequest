@@ -13,8 +13,8 @@ function IssueStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={issueStack.home} component={Home} />
-      <Stack.Screen name={issueStack.release_item} options={{headerTitle: 'Release Item'}} component={ViewApproval} />
-      <Stack.Screen name={issueStack.take_photo} options={{headerTitle: 'Upload Photo'}} component={DetailApproval} />
+      <Stack.Screen name={issueStack.release_item} options={{headerTitle: 'Release Item'}} component={ReleaseItem} />
+      <Stack.Screen name={issueStack.take_photo} options={{headerTitle: 'Upload Photo'}} component={TakePhoto} />
     </Stack.Navigator>
   );
 }

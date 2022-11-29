@@ -19,23 +19,11 @@ function Account(props) {
 
   const reInitSQL = () => {
     SQLite.deleteDatabase(
-      {name: 'db_pms.db', location: 'default'},  
-      () => { reactotron.log('db deleted');  },
-      error => {
-          reactotron.log("ERROR: " + error); 
-      }
+      {name: 'db_pms.db'},  
+      () => { reactotron.log('db deleted'); },
+      error => { reactotron.log("ERROR: " + error); }
     );
-    SQLite.openDatabase({name: 'db_pms.db', createFromLocation: 1}, 
-    () => {
-      showMessage({
-        message: 'Database Reset Success'
-      });
-    }, 
-    (e) => showMessage({
-      message: 'Error',
-      description: e.message,
-      type: 'danger'
-    }));
+
     dispatch(signOut());
   }
 

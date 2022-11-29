@@ -9,8 +9,10 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {historyStack} from '~/config/navigator';
-import {getIssue} from '~/modules/common/service';
+import {issueStack} from '~/config/navigator';
+// import {getIssue} from '~/modules/common/service';
+import {getIssue} from '~/modules/issue/local';
+import {authSelector, locationSelector} from '~/modules/auth/selectors';
 
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
@@ -23,15 +25,16 @@ const ITEM_HEIGHT = (height / 5) + 30;
 moment.locale('id-ID');
 
 function Issue(props) {
-  const {navigation, route, dispatch} = props;
+  const {navigation, route, dispatch, branch_id} = props;
   
   const [issue, setIssue] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
+  const [page, setPage] = useState(1);
+  // const [start, setStart] = useState(1);
+  // const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (start, end, date_from='', date_to='') => {
+  const fetchData = async (page) => {
     try {
       /**
        * @param start : start page
@@ -39,21 +42,34 @@ function Issue(props) {
        * @param date_from : tanggal mulai
        * @param date_to : tanggal akhir
        */
-      const {data} = await getIssue({start, end, date_from, date_to});
-
-      if(data.length < 50) {
-        setHide(true);
+      const {data} = await getIssue({branch_id,page});
+      if(data.error) {
+        throw Error(data.message);
       } else {
-        setHide(false);
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
+        
+        if(result.length < 50) {
+          setHide(true);
+        } else {
+          setHide(false);
+        }
+
+        if(page == 1) {
+          setIssue(result);
+        } else {
+          let listData = approval;
+          let cData = listData.concat(result);
+
+          // reactotron.log(cData);
+
+          setIssue(cData);
+        }
+        reactotron.log(result);
+        setLoading(false);
       }
-
-      let listData = issue;
-      let cData = listData.concat(data);
-
-      reactotron.log(cData);
-
-      setIssue(cData);
-      setLoading(false);
     } catch (e) {
       showMessage({
         message: e.code,
@@ -68,7 +84,7 @@ function Issue(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      // fetchData(start,end);
+      fetchData(page);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -76,8 +92,10 @@ function Issue(props) {
   }, [navigation]);
 
   React.useLayoutEffect(() => {
-    // fetchData(start, end);
-  }, [start, end]);
+    if(page != 1) {
+      fetchData(page);
+    }
+  }, [page]);
 
   const getItemLayout = React.useCallback(
     (data, index) => ({
@@ -88,23 +106,31 @@ function Issue(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={styles.itemCard} 
-      onPress={() => {
-        navigation.navigate(historyStack.view_history, {id: item.sivCode, dtrans: item.dtrans, createdBy: item.createdBy});
-      }}
-    >
-      <Text>{item.dtrans}</Text>
-      <Text>{item.no_order}</Text>
-      <Text>{item.createdBy}</Text>
-      <Text>{item.status}</Text>
-    </TouchableOpacity>,
+    ({ item, index }) => {
+      var unfrmt = item.dtrans.split('/');
+      let dtrans = unfrmt[2]+'-'+unfrmt[0]+'-'+unfrmt[1];
+
+      return (
+        <TouchableOpacity style={styles.itemCard} 
+          onPress={() => {
+            navigation.navigate(issueStack.release_item, {id: item.no_order, dtrans, requestBy: item.requestBy, order_status: item.order_status});
+          }}
+        >
+          <Text>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>
+          <Text>{item.no_order}</Text>
+          <Text>{item.requestBy}</Text>
+          <Text>{item.order_status}</Text>
+        </TouchableOpacity>
+      )
+    },
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
   const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
+    // setStart(end+1);
+    // setEnd(end+50);
+    setPage(page+1);
     setLoading(true);
   }
 
@@ -196,4 +222,11 @@ const styles = StyleSheet.create({
   }
 });
 
-export default connect()(Issue);
+const mapStateToProps = (state) => {
+  return {
+    auth: authSelector(state),
+    branch_id: locationSelector(state)
+  };
+};
+
+export default connect(mapStateToProps)(Issue);

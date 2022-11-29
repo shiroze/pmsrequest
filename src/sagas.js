@@ -3,7 +3,7 @@ import {all} from 'redux-saga/effects';
 import authSaga from './modules/auth/saga';
 import orderSaga from './modules/order/saga';
 import approvalSaga from './modules/approval/saga';
-// import productSaga from './modules/product/saga';
+import issueSaga from './modules/issue/saga';
 // import commonSaga from './modules/common/saga';
 // import orderSaga from './modules/order/saga';
 // import vendorSaga from './modules/vendor/saga';
@@ -22,7 +22,7 @@ export default function* rootSagas() {
     // productSaga(),
     orderSaga(),
     // vendorSaga(),
-    // checkoutSaga(),
+    issueSaga(),
     approvalSaga()
   ]);
 }
