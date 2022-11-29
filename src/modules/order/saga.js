@@ -147,20 +147,20 @@ function* localsetSaveItem({id, itemCode, qty, keterangan}) {
   }
 }
 
-function* localCheckout({branch_id,username, cart}) {
+function* localCheckout({branch_id,user,cart}) {
   try {
     const {data} = yield call(localSaveReq, {
       branch_id,
-      username,
+      user,
       cart,
     });
     
     reactotron.log(data);
 
     if(!data.error) {
-      // yield put({
-      //   type: Actions.LOCAL_CHECKOUT_SUCCESS,
-      // });
+      yield put({
+        type: Actions.LOCAL_CHECKOUT_SUCCESS,
+      });
 
       yield call(NavigationService.navigate, mainStack.approval);
       yield call(handleSuccess, new Error('Request berhasil disubmit'));

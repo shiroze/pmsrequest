@@ -3,7 +3,7 @@ import {db, ExecuteQuery, ExecuteManyQuery} from '~/config/db';
 
 import reactotron from 'reactotron-react-native';
 
-export const localSaveReq = ({branch_id,username, cart}) => {
+export const localSaveReq = ({branch_id,user,cart}) => {
   return new Promise(async (resolve, reject) => {
     var result = {
       error: false,
@@ -29,9 +29,11 @@ export const localSaveReq = ({branch_id,username, cart}) => {
     let frmt = '0000';
     let no_order = branch_id.toUpperCase()+"/"+year+"/"+month+"/"+frmt.slice(0, no.toString().length * -1) + no;
     let rowItem = [];
+    
+    let isApprove = user.accessRight.some(e => e.namaSubmodul == "APPROVE STAGE 1" && e.allow == "Y");
 
     try {
-      var sp_query = `INSERT INTO REQUEST(NO_ORDER, TGL_REQUEST, REQUEST_BY) VALUES('${no_order}', strftime('%m/%d/%Y','now'), '${username}')`;
+      var sp_query = `INSERT INTO REQUEST(NO_ORDER, TGL_REQUEST, REQUEST_BY,APPROVE_1,APPROVE_1_BY,APPROVE_1_DATE) VALUES('${no_order}', strftime('%m/%d/%Y','now'), '${user.userName}',${isApprove ? 1 : 0},'${user.userName}',${isApprove ? "strftime('%m/%d/%Y','now')" : 'NULL'})`;
       var scQuery = 'INSERT INTO REQUESTDETAIL(NO_ORDER,STOCKCODE,QTY_BEFORE,QTY,QTY_AFTER,KETERANGAN) VALUES';
 
       for(let element of cart) {

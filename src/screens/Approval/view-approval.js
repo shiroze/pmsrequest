@@ -45,7 +45,7 @@ function ViewApproval(props) {
         throw Error(data.message);
       } else {
         var result = data.data;
-        reactotron.log(result);
+        // reactotron.log(result);
 
         setList(result);
       }

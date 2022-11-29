@@ -131,7 +131,7 @@ function Order(props) {
     [
       {
         text: "OK",
-        onPress: () => dispatch(localCheckout({branch_id,username: auth.user.userName,cart: orderCart})),
+        onPress: () => dispatch(localCheckout({branch_id,user: auth.user,cart: orderCart})),
       },
       {
         text: "Cancel",

@@ -32,18 +32,3 @@ export const ExecuteQuery = (sql, params = []) => {
     });
   });
 };
-
-/**
- * This line just for multiple insert only
- * @param {*} sql 
- * @returns 
- */
-export const ExecuteManyQuery = (sql = []) => {
-  return new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      for (const element of sql) {
-        tx.executeSql(element).then(`Success Insert Query : ` + element);
-      }
-    });
-  });
-};

@@ -50,11 +50,11 @@ export function checkout({branch_id,username, cart}) {
   }
 }
 
-export function localCheckout({branch_id,username, cart}) {
+export function localCheckout({branch_id,user, cart}) {
   return {
     type: Actions.LOCAL_CHECKOUT,
     branch_id,
-    username,
+    user,
     cart
   }
 }
