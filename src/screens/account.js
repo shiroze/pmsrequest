@@ -18,6 +18,13 @@ function Account(props) {
   const {navigation, dispatch} = props;
 
   const reInitSQL = () => {
+    SQLite.deleteDatabase(
+      {name: 'db_pms.db', location: 'default'},  
+      () => { reactotron.log('db deleted');  },
+      error => {
+          reactotron.log("ERROR: " + error); 
+      }
+    );
     SQLite.openDatabase({name: 'db_pms.db', createFromLocation: 1}, 
     () => {
       showMessage({
@@ -29,6 +36,7 @@ function Account(props) {
       description: e.message,
       type: 'danger'
     }));
+    dispatch(signOut());
   }
 
   return (

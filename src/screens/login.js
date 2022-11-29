@@ -60,7 +60,7 @@ function Login(props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {  
       if(__DEV__) {
-        setUsername('MANDOR1');
+        setUsername('ASISTEN1');
         setPassword('SAYAMAUBERUBAH');
         setTimeout(() => {
           setValue('PND');
@@ -69,7 +69,6 @@ function Login(props) {
     });
     if(location != "") {
       setValue(location);
-      reactotron.log("Last Login Location : " + location);
     }
     
     // if(auth.pending) {

@@ -29,7 +29,7 @@ function rootNav(props) {
     RNFetchBlob.fs.ls(RNFetchBlob.fs.dirs.MainBundleDir + '/databases').then((files) => {
       let db_name = files.filter(e => e == 'db_pms.db')[0];
       
-      // reactotron.log(db_name, db_name == undefined ? 'Not Exist' : 'Exist');
+      reactotron.log(db_name, db_name == undefined ? 'Not Exist' : 'Exist');
       if(db_name == undefined) {
         SQLite.openDatabase({name: 'db_pms.db', createFromLocation: 1}, 
         () => {

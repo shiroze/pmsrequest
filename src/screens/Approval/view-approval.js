@@ -45,6 +45,7 @@ function ViewApproval(props) {
         throw Error(data.message);
       } else {
         var result = data.data;
+        reactotron.log(result);
 
         setList(result);
       }
@@ -64,7 +65,7 @@ function ViewApproval(props) {
       fetchData(id);
     });
 
-    reactotron.log(access);
+    // reactotron.log(access);
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
@@ -104,13 +105,13 @@ function ViewApproval(props) {
   const approve = () => {
     let stage=0;
 
-    if(access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && allow == 'Y')) {
+    if(access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && val.allow == 'Y')) {
       stage=1;
-    } else if(access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && allow == 'Y')) {
+    } else if(access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && val.allow == 'Y')) {
       stage=2;
     }
 
-    dispatch(localAppOrder({branch_id, id, username: auth.userName, stage}));
+    dispatch(localAppOrder({branch_id, id, username: auth.user.userName, stage}));
     // reactotron.log(access);
   }
 
