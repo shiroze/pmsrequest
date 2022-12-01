@@ -2,7 +2,8 @@ export const rootSwitch = {
   login: 'LoginScreen',
   main: 'MainStack',
   search: 'Search',
-  account: 'Account'
+  account: 'Account',
+  sync_page: 'SyncPage'
 };
 
 export const mainStack = {

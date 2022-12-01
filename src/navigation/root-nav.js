@@ -7,6 +7,7 @@ import MainStack from './main-stack';
 import MainStack2 from './main-stack-2';
 import Search from '~/screens/search';
 import Account from '~/screens/account';
+import SyncPage from '~/screens/synchronize';
 
 import { isLoginSelector, accessSelector } from '~/modules/auth/selectors';
 
@@ -61,6 +62,7 @@ function rootNav(props) {
       }
       <Stack.Screen name={rootSwitch.search} options={{title: "Search"}} component={Search} />
       <Stack.Screen name={rootSwitch.account} options={{title: "Account"}} component={Account} />
+      <Stack.Screen name={rootSwitch.sync_page} options={{title: "Sync Data"}} component={SyncPage} />
     </Stack.Navigator>
   );
 }

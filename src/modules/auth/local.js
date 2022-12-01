@@ -12,11 +12,12 @@ export const LocalSignIn = ({username, password}) => {
       message: ""
     };
 
-    var user = await ExecuteQuery(`SELECT * FROM USERPROFILE WHERE LOGINID=? AND ACCESSRIGHTS='Y'`, [username]);
+    var user = await ExecuteQuery(`SELECT * FROM USERPROFILE WHERE LOGINID=? AND ACCESSRIGHTS='Y'`, [username.toUpperCase()]);
     
     const salt = await BcryptReactNative.getSalt(15);
     const hash = await BcryptReactNative.hash(salt, user[0].PASSWORD);
     const valid = await BcryptReactNative.compareSync(password, hash);
+    
     var accessRight = [];
 
     if(valid) {
@@ -25,7 +26,7 @@ export const LocalSignIn = ({username, password}) => {
           LEFT JOIN MODULE C ON B.MODULECODE=C.CODE
           LEFT JOIN SUBMODULE D ON C.CODE=D.MODULE AND B.SUBMODULECODE=D.CODE
           WHERE B.LOGINID=? AND C.NAME='WAREHOUSE ROLES'
-          ORDER BY C.NAME,D.NAME,D.CLASSNAME`, [username]);
+          ORDER BY C.NAME,D.NAME,D.CLASSNAME`, [username.toUpperCase()]);
       
       if(roles.length > 0) {
         await roles.forEach(element => {

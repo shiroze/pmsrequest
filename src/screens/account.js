@@ -6,6 +6,7 @@ import { ListItem } from '@rneui/base';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
+import {rootSwitch} from '~/config/navigator';
 import {signOut} from '~/modules/auth/actions';
 
 import { connect } from 'react-redux';
@@ -30,7 +31,6 @@ function Account(props) {
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
       <Header goBack={true} {...props} />
-      <Text>Account Screen</Text>
       <ListItem onPress={() => {
         reactotron.log("Kamu lagi mencoba ganti password");
       }}>
@@ -40,10 +40,10 @@ function Account(props) {
         <ListItem.Chevron></ListItem.Chevron>
       </ListItem>
       <ListItem onPress={() => {
-        reInitSQL();
+        navigation.navigate(rootSwitch.sync_page);
       }}>
         <ListItem.Content>
-          <ListItem.Title>Reset SQLite</ListItem.Title>
+          <ListItem.Title>Sync Data</ListItem.Title>
         </ListItem.Content>
         <ListItem.Chevron></ListItem.Chevron>
       </ListItem>
