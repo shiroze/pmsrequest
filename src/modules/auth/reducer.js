@@ -1,4 +1,5 @@
 import {fromJS, List} from 'immutable';
+import moment from 'moment';
 
 import {REHYDRATE} from 'redux-persist/lib/constants';
 import * as Actions from './constants';
@@ -14,6 +15,7 @@ const initState = fromJS({
   username: '',
   location: '',
   loginError: initError,
+  timeOut: moment().add(2, 'h')
 });
 
 export default function authReducer(state = initState, {type, payload}) {
@@ -25,13 +27,15 @@ export default function authReducer(state = initState, {type, payload}) {
     case Actions.SIGN_IN_SUCCESS:
       return state
         .set('pending', false)
-        .set('user', fromJS(payload.user))
+        .set('user', payload.user)
         /**
-         * Don't use fromJS if you set Array Value
+         * Don't use fromJS to set Value
          */
         .set('accessRight', payload.accessRight)
-        .set('location', fromJS(payload.location))
+        .set('location', payload.location)
         .set('isLogin', true);
+    case Actions.SET_SESSION:
+      return state.set('timeOut', moment().add(30, 'm'));
     case Actions.SIGN_IN_FAILED:
       const errorSignIn = notificationMessage(payload);
       return state.set('pending', false).set('loginError', fromJS(errorSignIn));

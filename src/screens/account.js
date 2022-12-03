@@ -25,7 +25,7 @@ function Account(props) {
       error => { reactotron.log("ERROR: " + error); }
     );
 
-    dispatch(signOut());
+    dispatch(signOut({expired: false}));
   }
 
   return (
@@ -48,7 +48,7 @@ function Account(props) {
         <ListItem.Chevron></ListItem.Chevron>
       </ListItem>
       <ListItem onPress={() => {
-        dispatch(signOut());
+        dispatch(signOut({expired: false}));
       }}>
         <ListItem.Content>
           <ListItem.Title>Logout</ListItem.Title>

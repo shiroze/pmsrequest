@@ -10,74 +10,148 @@ import Container from '~/components/Container';
 import Header from '~/components/Header';
 
 // import {getMaterialbyID} from '~/modules/common/service';
-import {getMaterialbyID} from '~/modules/common/service';
+import {loadCardStock} from '~/modules/report/local';
 import {locationSelector} from '~/modules/auth/selectors';
 import {addToCart} from '~/modules/order/actions';
 import {orderSelector} from '~/modules/order/selectors';
 
 import reactotron from 'reactotron-react-native';
-import { showMessage } from 'react-native-flash-message';
+
+import {handleError, handleInfo, handleSuccess} from '~/utils/message';
 
 import { connect } from 'react-redux';
+import moment from 'moment';
 
 const {height, width} = Dimensions.get('window');
 
 function ViewItem(props) {
   const {navigation, route, dispatch, orderCart, branch_id} = props;
-  const {item} = route.params;
+  const {itemData} = route.params;
 
-  const [data, setData] = useState();
+  const [list, setList] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [qty, setQty] = useState(0);
-  const [keterangan, setKeterangan] = useState("");
+  const [page, setPage] = useState(1);
+  const [hide, setHide] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const fetchData = async (item_code) => {
+  const fetchData = async (item_code, page) => {
     try {
       /**
-       * @param groupCode : group name
+       * @param item_code : kode barang
+       * @param page : halaman
        */
-      const {data} = await getMaterialbyID({branch_id,item_code});
+      const {data} = await loadCardStock({branch_id,item_code,page});
 
       if(data.error) {
+        setLoading(false);
         throw Error(data.message);
       } else {
-        setData(data.data);
+        // data.forEach(element => {
+        //   reactotron.log(element);
+        // });
+        var result = data.data;
+
+        reactotron.log(result);
+
+        if(result.length < 50) {
+          setHide(true);
+        } else {
+          setHide(false);
+        }
+
+        let listData = list;
+        let cData = listData.concat(result);
+
+        setList(cData);
+        setLoading(false);
       }
     } catch (e) {
-      showMessage({
-        message: e.code,
-        description: e.message,
-        icon: 'danger',
-        type: 'danger',
-        hideOnPress: true
-      });
+      handleError(e);
     }
   }
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      // fetchData(item_code);
-      reactotron.log(item);
+      fetchData(itemData.itemCode, page);
+      // reactotron.log(item);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
   
+  const renderItem = React.useCallback(
+    ({ item }) => {
+      var dt = item.dtrans ? item.dtrans.split('/') : '';
+      var dtrans = item.dtrans ? dt[1]+'-'+dt[0]+'-'+dt[2] : moment().format('DD-MM-YYYY');
+
+      return (
+        <View style={styles.itemCard}>
+          <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 8}]}>
+            <Text style={[styles.fontStyle, {width: '40%'}]}>{dtrans}</Text>
+            <Text style={[styles.fontStyle, {width: '40%'}]}>{item.no_order}</Text>
+            <Text style={[styles.fontStyle, {width: '20%'}]}>{item.requestBy}</Text>
+          </View>
+          <View style={[styles.borderStyle, {flexDirection: 'row'}]}>
+            <Text style={[styles.fontStyle, {width: '20%', fontWeight: '800'}]}>Qty Diambil</Text>
+            <Text style={[styles.fontStyle, {width: '37%'}]}>{`${item.qty} ${item.uom}`}</Text>
+            <Text style={[styles.fontStyle, {width: '25%', fontWeight: '800'}]}>Saldo</Text>
+            <Text style={[styles.fontStyle, {width: '18%'}]}>{`${item.qty_after} ${item.uom}`}</Text>
+          </View>
+        </View>
+      )
+    },
+    [],
+  )
+  const footerComponent = () => {
+    if(list.length > 0) {
+      return (
+        !hide ? <TouchableOpacity style={{marginBottom: 12, alignItems: 'center'}} onPress={_nextPage}>
+          <Text style={{fontSize: 18}}>{loading ? <ActivityIndicator size={"large"} color={'#faa634'} style={{marginTop: 24}} /> : "Load more"}</Text>
+        </TouchableOpacity> : <View style={{marginBottom: 12, alignItems: 'center'}}>
+          <Text style={{fontSize: 18}}>Reach end of list</Text>
+        </View>
+      )
+    } else {
+      return (
+        <View style={{marginTop:18, marginBottom: 12, alignItems: 'center'}}>
+          <Text style={{fontSize: 20}}>No data Found</Text>
+        </View>
+      )
+    }
+  }
+  const _nextPage = async () => {
+    setPage(page+1);
+    setLoading(true);
+    setFilter("");
+  }
+  
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header goBack={true} title={item && item.itemDescription} {...props} />
+      <Header goBack={true} title={itemData && itemData.itemDescription} {...props} />
       <View style={[styles.borderStyle, {borderBottomWidth: .875, padding: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}]}>
-        <Text style={{fontWeight: 'bold', fontSize: 14}}>{item && item.groupName}</Text>
-        {(item && item.subgroupName) && <Icon name='arrow-right' type='font-awesome' size={14} />}
-        <Text style={{fontWeight: 'bold', fontSize: 14}}>{(item && item.subgroupName) && item.subgroupName}</Text>
+        <Text style={{fontWeight: 'bold', fontSize: 14}}>{itemData && itemData.groupName}</Text>
+        {(itemData && itemData.subgroupName) && <Icon name='arrow-right' type='font-awesome' size={14} />}
+        <Text style={{fontWeight: 'bold', fontSize: 14}}>{(itemData && itemData.subgroupName) && itemData.subgroupName}</Text>
       </View>
       <View style={[styles.card, styles.borderStyle, {borderBottomWidth: .875}]}>
-        <Text style={styles.textStyle}>Kode: {item ? item.itemCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={styles.textStyle}>Nama Barang: {item ? item.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={[styles.textStyle, {position: 'absolute', right: 10, top: 10, fontSize: 18, fontWeight: '800'}]}>{item ? (item.stock +" "+ item.uomCode) : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+        <Text style={styles.textStyle}>Kode: {itemData ? itemData.itemCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+        <Text style={styles.textStyle}>Spec: {itemData ? itemData.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+        <Text style={[styles.textStyle, {position: 'absolute', right: 10, top: 10, fontSize: 18, fontWeight: '800'}]}>{itemData ? (itemData.stock +" "+ itemData.uomCode) : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
       </View>
-      {/* <FlatList /> */}
+      <View style={[styles.borderStyle, {flexDirection: 'row', padding: 4, marginTop: 4, marginLeft: 16}]}>
+        <Text style={[styles.fontStyle, {width: '38%', fontWeight: '800'}]}>Tanggal Pengeluaran</Text>
+        <Text style={[styles.fontStyle, {width: '38%', fontWeight: '800'}]}>No. Order</Text>
+        <Text style={[styles.fontStyle, {width: '24%', fontWeight: '800'}]}>Pemohon</Text>
+      </View>
+      <FlatList
+        data={list}
+        renderItem={renderItem}
+        // maxToRenderPerBatch={8}
+        // getItemLayout={getItemLayout}
+        ListFooterComponent={footerComponent}
+        // keyExtractor={keyExtractor} 
+      />
     </Container>
   )
 }
@@ -126,7 +200,29 @@ const styles = StyleSheet.create({
     borderRadius: 10, 
     borderColor: '#FFF',
     overflow: 'hidden',
-  }
+  },
+  fontStyle: {
+    fontSize: 14,
+  },
+  itemCard: {
+    flex:1, 
+    margin: 14, 
+    padding: 8,
+    backgroundColor: '#FFF',
+    height: (height * 0.0465) + 24, 
+    borderRadius: 10, 
+    overflow: 'hidden',
+    borderWidth: 1, 
+    borderColor: '#FFF',
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity:  0.18,
+    shadowRadius: 4.59,
+    elevation: 5
+  },
 });
 
 const mapStateToProps = (state) => {

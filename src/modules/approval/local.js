@@ -75,9 +75,9 @@ export const localApproveSV = ({id, username, stage}) => {
     var query;
 
     if(stage == 1) {
-      query = `APPROVE_1=1, APPROVE_1_BY='${username}', `;
+      query = `APPROVE_1=1, APPROVE_1_BY='${username}' `;
     } else if(stage == 2) {
-      query = `APPROVE_2=1, APPROVE_2_BY='${username}', `;
+      query = `APPROVE_2=1, APPROVE_2_BY='${username}' `;
     }
 
     reactotron.log(query);

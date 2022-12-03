@@ -62,9 +62,9 @@ function Login(props) {
       if(__DEV__) {
         setUsername('ASISTEN1');
         setPassword('SAYAMAUBERUBAH');
-        setTimeout(() => {
-          setValue('PND');
-        }, 1000);
+        // setTimeout(() => {
+        //   setValue('PND');
+        // }, 1000);
       }
     });
     if(location != "") {
@@ -84,6 +84,7 @@ function Login(props) {
 
   const _signIn = () => {
     Keyboard.dismiss();
+
     if(username == "") {
       handleError(new Error("Username tidak boleh kosong"));
     } else if(password == "") {

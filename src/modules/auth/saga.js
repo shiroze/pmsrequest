@@ -1,4 +1,5 @@
 import {put, call, select, takeEvery} from 'redux-saga/effects';
+import moment from 'moment';
 
 import * as Actions from './constants';
 
@@ -90,17 +91,22 @@ function* localSignIn({branch_id, username, password}) {
       },
     });
 
-    yield call(handleError, e)
+    yield call(handleError, e);
   }
 }
 
-function* signOut() {
+function* signOut({expired = false}) {
   yield put({
     type: Actions.SIGN_OUT_SUCCESS
   });
   
   yield call(NavigationService.navigate, rootSwitch.login);
-  yield call(handleSuccess, new Error('Logout Berhasil'));
+  
+  if(expired) {
+    yield call(handleSuccess, new Error('Sesi berakhir, silahkan login kembali'));
+  } else {
+    yield call(handleSuccess, new Error('Logout Berhasil'));
+  }
 }
 
 export default function* authSaga() {

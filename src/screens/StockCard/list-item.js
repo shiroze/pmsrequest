@@ -5,6 +5,7 @@ import { Avatar, Icon, Input, SearchBar } from '@rneui/themed';
 
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
+import Item from '~/components/Item';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
@@ -148,18 +149,12 @@ function ListItem(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item }) => <TouchableOpacity style={styles.itemCard} onPress={() => navigation.navigate(stockCardStack.view_card, {item})}>
-      <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
-          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.stock || 0}</Text>
-          {" "+item.uomCode}
-        </Text>
-      </View>
-      <Text style={[styles.fontStyle, {flexGrow: 1, fontWeight: 'bold'}]} numberOfLines={2}>Nama : {item.itemDescription}</Text>
-    </TouchableOpacity>,
+    ({ item }) => 
+      <Item 
+        item={item}
+        branch_id={branch_id}
+        onPress={() => navigation.navigate(stockCardStack.view_card, {itemData: item})}
+      />,
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])

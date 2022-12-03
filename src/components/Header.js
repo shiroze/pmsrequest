@@ -39,10 +39,10 @@ const Header = (props) => {
   }
 
   return (
-    <View style={{height: headerHeight,flexDirection: 'row', backgroundColor: "#faa634", alignItems: 'center'}}>
+    <View style={{height: headerHeight, width, flexDirection: 'row', backgroundColor: "#faa634", alignItems: 'center', padding: 8}}>
       {
         goBack &&
-        <TouchableOpacity style={{marginLeft: 8}} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={{width: 24}} onPress={() => navigation.goBack()}>
           <Icon 
             name='arrow-left'
             type='material-community'
@@ -56,7 +56,7 @@ const Header = (props) => {
           <SearchBar {...props} stock={route.name == "Home" ? false : true} />
         </>
       ) : (
-        <View style={{marginLeft: 24, width: goBack ? width * 0.75 : width * 0.85}}>
+        <View style={{marginLeft: 12, width: goBack ? (width * 0.75) + 8 : (width * 0.8) + 12}}>
           <Text style={{fontSize: 22, fontWeight: 'bold', color: '#FFF'}} numberOfLines={1}>{Headertitle}</Text>
         </View>
       )}

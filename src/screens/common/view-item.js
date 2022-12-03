@@ -160,7 +160,7 @@ function ViewItem(props) {
             onBlur={() => {
               if(qty > data.stock) {
                 showMessage({
-                  message: "Stock kurang",
+                  message: "Kuantiti Diminta melebihi stock yang ada",
                   icon: 'warning',
                   type: 'info',
                   duration: 2000
@@ -192,7 +192,7 @@ function ViewItem(props) {
           toggleOverlay();
         } else {
           showMessage({
-            message: "Stock tidak boleh kosong",
+            message: "Kuantiti Diminta tidak boleh kosong",
             icon: 'warning',
             type: 'danger'
           });

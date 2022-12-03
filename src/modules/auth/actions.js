@@ -24,8 +24,9 @@ export function localSignIn({branch_id, username, password}) {
   };
 }
 
-export function signOut() {
+export function signOut({expired}) {
   return {
-    type: Actions.SIGN_OUT
+    type: Actions.SIGN_OUT,
+    expired
   }
 }

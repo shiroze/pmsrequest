@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import { Text, View, StyleSheet, Dimensions, Keyboard, FlatList, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, Dimensions, Keyboard, FlatList, TouchableOpacity, BackHandler } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { Avatar, Icon, Input } from '@rneui/themed';
 
@@ -13,9 +14,9 @@ import {authSelector, locationSelector} from '~/modules/auth/selectors';
 // import {loadItemGroup} from '~/modules/common/service';
 import {loadItemGroup} from '~/modules/common/local';
 
-import { showMessage } from 'react-native-flash-message';
-
 import { connect } from 'react-redux';
+
+import {handleError, handleInfo, handleSuccess} from '~/utils/message';
 import reactotron from 'reactotron-react-native';
 
 const {width, height} = Dimensions.get('window');
@@ -23,8 +24,9 @@ const btnSize = 72;
 const iconSize = 32;
 
 function Home (props) {
-  const {navigation, auth, branch_id} = props;
+  const {navigation, route, auth, branch_id} = props;
   
+  const [backPressCount, setBackPressCount] = useState(0);
   const [list, setList] = useState();
   const dataSource = [
     {
@@ -107,12 +109,9 @@ function Home (props) {
         setList(newData);
       }
     } catch (e) {
-      showMessage({
+      handleError({
         message: e.code,
         description: e.message,
-        icon: 'danger',
-        type: 'danger',
-        hideOnPress: true
       });
     }
   }
@@ -125,6 +124,21 @@ function Home (props) {
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
+  
+  useFocusEffect(
+    React.useCallback(() => {
+      const backhandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        if(route.name == homeStack.home) {
+          BackHandler.exitApp();
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      return () => backhandler.remove();
+    }, [])
+  );
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>

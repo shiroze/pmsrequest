@@ -5,10 +5,11 @@ export function handleError(e) {
   showMessage({
     // message: e.code,
     message: e.message,
-    // description: e.message,
+    description: e.description,
     type: 'danger',
     duration: 3000,
-    statusBarHeight: getStatusBarHeight()
+    hideOnPress: true,
+    statusBarHeight: getStatusBarHeight(),
   });
 }
 

@@ -6,6 +6,7 @@ import { Icon, Overlay } from '@rneui/themed';
 
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
+import Item from '~/components/Item';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
@@ -48,6 +49,10 @@ function Order(props) {
     return unsubscribe;
   }, [navigation]);
 
+  React.useLayoutEffect(() => {
+    reactotron.log(showView);
+  }, [showView]);
+
   const toggleView = () => {
     setShowView(!showView);
   };
@@ -58,6 +63,11 @@ function Order(props) {
 
     return (
       <Overlay isVisible={showView} animationType={'slide'} onBackdropPress={toggleView} overlayStyle={{backgroundColor: '#FFF', padding: 8, height: '60%', width: '80%'}}>
+        <View style={{ width: '100%', alignItems: 'flex-end' }}>
+          <TouchableOpacity style={{width: 32}} onPress={toggleView}>
+            <Icon type={'font-awesome'} name={'times'} color={'#566573'} size={32} />
+          </TouchableOpacity>
+        </View>
         {viewData ?
           (
             <View style={{flex:1, margin: 20}}>
@@ -67,16 +77,13 @@ function Order(props) {
               <Text style={styles.textStyle}>{"Kuantiti Tersedia: "+viewData.stock}</Text>
               <Text style={styles.textStyle}>{"Kuantiti Diminta: "+viewData.qty}</Text>
               <Text style={styles.textStyle}>{"Keterangan Penggunaan: "+viewData.keterangan}</Text>
-              <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center'}}>
-                <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '40%'}]}
+              <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, justifyContent: 'center'}}>
+                <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '50%'}]}
                   onPress={() => {
                     array.splice(selected, 1);
                     dispatch(removeFromCart({payload:array}))
                   }}>
                   <Text style={{color: '#FFF'}}>Hapus</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.btnStyle, {width: '40%'}]} onPress={toggleView}>
-                  <Text style={{color: '#FFF'}}>Batal</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -102,26 +109,17 @@ function Order(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={styles.itemCard} 
-      onPress={() => {
-        setSelected(index);
-        setTimeout(() => {
-          toggleView();
-        }, 700);
-      }}
-    >
-      <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
-        <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
-          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
-          {" "+item.uomCode}
-        </Text>
-      </View>
-      <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.itemDescription}</Text>
-      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: {item.keterangan}</Text>
-    </TouchableOpacity>,
+    ({ item, index }) => 
+      <Item 
+        item={item}
+        branch_id={branch_id}
+        onPress={() => {
+          setSelected(index);
+          setTimeout(() => {
+            toggleView();
+          }, 700);
+        }}
+      />,
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])

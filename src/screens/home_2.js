@@ -236,13 +236,15 @@ const styles = StyleSheet.create({
   textWhite: {
     color: '#FFF',
     lineHeight: 28,
-    fontSize: 16
+    fontSize: width > 420 ? 14 : 12
   },
   identityCard: { 
     flexDirection: 'row',
     alignItems: 'center',
     // justifyContent: 'space-evenly',
     height: height * 0.15,
+    width: (width * 0.9) + 16,
+    overflow: 'hidden',
     padding: 16,
     marginTop: 16,
     marginBottom: 8,

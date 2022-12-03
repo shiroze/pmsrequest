@@ -79,16 +79,16 @@ function SyncPage(props) {
     })
     .promise.then((response) => {
       if (response.statusCode == 200) {
-        console.log('FILES UPLOADED!'); // response.statusCode, response.headers, response.body
+        reactotron.log('FILES UPLOADED!'); // response.statusCode, response.headers, response.body
       } else {
-        console.log('SERVER ERROR');
+        reactotron.log('SERVER ERROR');
       }
     })
     .catch((err) => {
       if(err.description === "cancelled") {
         // cancelled by user
       }
-      console.log(err);
+      reactotron.log(err);
     });
   }
 

@@ -68,7 +68,7 @@ function* removeBarang({payload}) {
 
     // reactotron.log(Array.isArray(products));
 
-    yield call(handleError, new Error('Barang berhasil dibuang'))
+    yield call(handleError, new Error('Barang berhasil dibatalkan'))
 
     // yield call(NavigationService.navigate, mainStack.add_rent);
     yield call(NavigationService.goBack);

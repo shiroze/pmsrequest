@@ -99,6 +99,7 @@ export const getMaterial = async ({groupName, subgroupName, page, query}) => {
     var resp = await ExecuteQuery(`SELECT * FROM (
         ${queryStr}
       ) WHERE GROUPNAME=? AND
+      QTYONHAND > 0 AND
       ITEMDESCRIPTION LIKE ?
       ORDER BY ITEMDESCRIPTION
       LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`, [groupName, `%${query}%`]);

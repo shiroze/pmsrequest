@@ -25,8 +25,9 @@ const CustomSearchBar = (props) => {
         size: 16
       }}
       containerStyle={{
-        width: width * 0.85,
-        marginLeft: 16,
+        width: width * 0.8,
+        marginLeft: 8,
+        marginRight: (width > 420 ? 16 : 8),
         backgroundColor:'transparent',
         borderTopWidth: 0,
         borderBottomWidth: 0,

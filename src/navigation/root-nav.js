@@ -1,5 +1,9 @@
-import React from 'react'
+import React, {useRef, useState} from 'react';
+import { AppState } from 'react-native';
+import moment from 'moment';
+
 import { createStackNavigator } from '@react-navigation/stack';
+
 import {rootSwitch} from '~/config/navigator';
 
 import Login from '~/screens/login';
@@ -9,7 +13,9 @@ import Search from '~/screens/search';
 import Account from '~/screens/account';
 import SyncPage from '~/screens/synchronize';
 
-import { isLoginSelector, accessSelector } from '~/modules/auth/selectors';
+import * as Actions from '~/modules/auth/constants';
+import {signOut} from '~/modules/auth/actions';
+import { isLoginSelector, accessSelector, sessionSelector } from '~/modules/auth/selectors';
 
 import { connect } from 'react-redux';
 import SQLite from 'react-native-sqlite-storage';
@@ -19,7 +25,9 @@ import reactotron from 'reactotron-react-native';
 const Stack = createStackNavigator();
 
 function rootNav(props) {
-  const {isLogin, accessRight} = props;
+  const {route, dispatch, sessionTime, isLogin, accessRight} = props;
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
   const initRoute = (__DEV__ && isLogin) ? rootSwitch.main : rootSwitch.login;
 
@@ -37,18 +45,40 @@ function rootNav(props) {
           reactotron.log("Database Initialization Success");
         }, 
         (e) => reactotron.log(e));
-        // SQLite.deleteDatabase(
-        //   {name: 'test.db', location: '~www/test.db'},  
-        //   () => { console.log('second db deleted');  },
-        //   error => {
-        //       console.log("ERROR: " + error); 
-        //   }
-        // );
       } 
       // else {
       //   // reactotron.log("Database already existed, Skip Initialization");
       // }
     });
+
+    if(sessionTime !== undefined) {
+      var diff = moment(sessionTime).diff(moment(), 'm');
+      
+      if(diff < 0) {
+        reactotron.log("Cur Session : " + moment(sessionTime).format('lll')+" | "+moment().format('lll'), "Diff : " + diff);
+        dispatch(signOut({expired: true}));
+      }
+    }
+  }, [sessionTime]);
+
+  React.useEffect(() => {
+    const subscription = AppState.addEventListener("change", nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+        reactotron.log("App has come to the foreground!");
+      } else if(appState.current.match(/active/) && nextAppState === "background" && isLogin) {
+        /** Set Timeout to Login */
+        dispatch({
+          type: Actions.SET_SESSION
+        });
+      }
+
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   return (
@@ -69,6 +99,7 @@ function rootNav(props) {
 
 const mapStateToProps = (state) => {
   return {
+    sessionTime: sessionSelector(state),
     accessRight: accessSelector(state),
     isLogin: isLoginSelector(state),
   }

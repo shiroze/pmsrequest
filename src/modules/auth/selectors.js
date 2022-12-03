@@ -14,5 +14,9 @@ export const isLoginSelector = createSelector(
 );
 export const locationSelector = createSelector(
   rootAuth, 
-  (data) => data.getIn(['location']) || fromJS([]),
+  (data) => data.get('location'),
 );
+export const sessionSelector = createSelector(
+  rootAuth,
+  (data) => data.get('timeOut'),
+)
