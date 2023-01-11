@@ -28,7 +28,7 @@ moment.locale('id-ID');
 
 function ReleaseItem(props) {
   const {navigation, route, dispatch, auth, access, branch_id} = props;
-  const {id, dtrans, requestBy, order_status} = route.params;
+  const {itemData, dtrans} = route.params;
   const [allow, setAllow] = useState(false);
   
   const [list, setList] = useState([]);
@@ -44,7 +44,7 @@ function ReleaseItem(props) {
       if(data.error) {
         throw Error(data.message);
       } else {
-        var result = data.data;
+        let result = data.data;
         // reactotron.log(result);
 
         setList(result);
@@ -62,9 +62,11 @@ function ReleaseItem(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(id);
-      if(access.some(val => val.namaSubmodul == "RELEASE ITEM" && val.allow == 'Y')) {
+      fetchData(itemData.no_order);
+      if(access.some(val => val.namaSubmodul == "RELEASE ITEM" && val.allow == 'Y') && itemData.approve_stage < 3) {
         setAllow(true);
+      } else if (itemData.approve_stage == 3) {
+        setAllow(false);
       } else {
         setAllow(false);
       }
@@ -83,17 +85,17 @@ function ReleaseItem(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc'}]} 
+    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 1) ? '#ffc7c7' : '#c7ffdc'}]} 
       onPress={() => {
-        allow ?
-        navigation.navigate(issueStack.detail_issue, {id, item}) : reactotron.log("Not Allowed")
+        // navigation.navigate(issueStack.detail_issue, {id, item});
+        reactotron.log("Do Nothing");
       }}
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc', textAlign: 'center'}]}>
+        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: (item.rejected && item.rejected == 1) ? '#ffc7c7' : '#c7ffdc', textAlign: 'center'}]}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
           {" "+item.uomCode}
         </Text>
@@ -106,7 +108,7 @@ function ReleaseItem(props) {
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
 
   const release = () => {
-    dispatch(localIssueOrder({branch_id, id, username: auth.user.userName}));
+    dispatch(localIssueOrder({branch_id, id: itemData.no_order, username: auth.user.userName}));
   }
 
   return (
@@ -119,15 +121,15 @@ function ReleaseItem(props) {
         </View>
         <View style={{width: '30%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>No Order</Text>
-          <Text>{id}</Text>
+          <Text>{itemData.no_order}</Text>
         </View>
         <View style={{width: '25%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Pemohon</Text>
-          <Text>{requestBy}</Text>
+          <Text>{itemData.requestBy}</Text>
         </View>
         <View style={{width: '20%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Status</Text>
-          <Text>{order_status}</Text>
+          <Text>{itemData.order_status}</Text>
         </View>
       </View>
       <FlatList 

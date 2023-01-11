@@ -103,6 +103,10 @@ function* signOut({expired = false}) {
   yield call(NavigationService.navigate, rootSwitch.login);
   
   if(expired) {
+    yield put({
+      type: Actions.SET_SESSION,
+      payload: undefined
+    });
     yield call(handleSuccess, new Error('Sesi berakhir, silahkan login kembali'));
   } else {
     yield call(handleSuccess, new Error('Logout Berhasil'));

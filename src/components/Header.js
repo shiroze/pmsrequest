@@ -60,7 +60,7 @@ const Header = (props) => {
           <Text style={{fontSize: 22, fontWeight: 'bold', color: '#FFF'}} numberOfLines={1}>{Headertitle}</Text>
         </View>
       )}
-      <Avatar
+      {!goBack && <Avatar
         size={40}
         rounded
         icon={{
@@ -71,7 +71,7 @@ const Header = (props) => {
         }}
         containerStyle={{ backgroundColor: '#FFF' }}
         onPress={() => navigation.navigate(rootSwitch.account)}
-      />
+      />}
     </View>
   )
 }

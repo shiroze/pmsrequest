@@ -9,6 +9,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
+import {homeStack} from '~/config/navigator';
 // import {getMaterialbyID} from '~/modules/common/service';
 import {getMaterialbyID} from '~/modules/common/local';
 import {locationSelector} from '~/modules/auth/selectors';
@@ -30,6 +31,11 @@ function ViewItem(props) {
   const [visible, setVisible] = useState(false);
   const [qty, setQty] = useState(0);
   const [keterangan, setKeterangan] = useState("");
+
+  const [location_type, setLocationType] = useState("");
+  const [location_code, setLocationCode] = useState("");
+  const [job_code, setJobCode] = useState("");
+  const [job_description, setJobDescription] = useState("");
 
   const fetchData = async (item_code) => {
     try {
@@ -63,6 +69,18 @@ function ViewItem(props) {
     return unsubscribe;
   }, [navigation]);
 
+  React.useLayoutEffect(() => {
+    const {tipe, code, value} = route.params;
+    if(tipe == 1) {
+      setLocationType(value);
+    } else if(tipe == 2) {
+      setLocationCode(value);
+    } else if(tipe == 3) {
+      setJobCode(value);
+      setJobDescription(code);
+    }
+  }, [route.params]);
+
   const toggleOverlay = () => {
     setVisible(!visible);
   };
@@ -83,7 +101,7 @@ function ViewItem(props) {
        * Update Qty jika barang yang sama dipilih
        * Timpa Qty lama
        */
-      var index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
+      let index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
       newArrayList[index].qty = item.qty;
 
       dispatch(addToCart({payload:newArrayList}));
@@ -111,7 +129,7 @@ function ViewItem(props) {
                 <Text style={{color: '#FFF'}}>Batal</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.btnStyle, {width: '40%'}]} onPress={() => {
-                var item = {
+                let item = {
                   itemCode: data.itemCode,
                   itemDescription: data.itemDescription,
                   uomCode: data.uomCode,
@@ -119,7 +137,8 @@ function ViewItem(props) {
                   subgroupName: data.subgroupName,
                   qty,keterangan,
                   stock: data.stock,
-                  warehouse: data.warehouse
+                  warehouse: data.warehouse,
+                  location_type, location_code, job_code
                 };
                 add_to_cart(item);
               }}>
@@ -148,7 +167,7 @@ function ViewItem(props) {
         <Text style={styles.textStyle}>Nama Barang: {data ? data.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Satuan: {data ? data.uomCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Kuantiti Tersedia: {data ? data.stock : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <View style={{flexDirection: 'row'}}>
+        <View>
           <Text style={styles.textStyle}>Kuantiti Diminta: </Text>
           <Input 
             placeholder='Kuantiti Diminta'
@@ -171,19 +190,51 @@ function ViewItem(props) {
             keyboardType={'number-pad'}
           />
         </View>
-        <View style={{flexDirection: 'row'}}>
-          <Text style={styles.textStyle}>Keterangan Penggunaan: </Text>
+        <View>
+          <Text style={styles.textStyle}>Location Type</Text>
+          <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 1, value: ''})}>
+            <Input
+              disabled
+              placeholder='Location Type'
+              containerStyle={{width: width*0.5}}
+              inputStyle={styles.inputStyle}
+              inputContainerStyle={styles.inputContainerStyle}
+              value={location_type}
+            />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <Text style={styles.textStyle}>Location Code</Text>
+          <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 2, value: location_type})}>
+            <Input
+              disabled
+              placeholder='Location Code'
+              containerStyle={{width: width*0.5}}
+              inputStyle={styles.inputStyle}
+              inputContainerStyle={styles.inputContainerStyle}
+              value={location_code}
+            />
+          </TouchableOpacity>
+        </View>
+        <View>
+          <Text style={styles.textStyle}>Job Code</Text>
+          <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 3, value: ''})}>
+            <Input
+              disabled
+              placeholder='Job Code'
+              containerStyle={{width: width*0.5}}
+              inputStyle={styles.inputStyle}
+              inputContainerStyle={styles.inputContainerStyle}
+              value={job_code}
+            />
+          </TouchableOpacity>
           <Input 
-            multiline
-            numberOfLines={5}
-            textAlignVertical={'top'}
-            containerStyle={{width: width*0.6}}
+            disabled
+            placeholder='Job Description'
+            containerStyle={{width: width*0.5}}
             inputStyle={styles.inputStyle}
-            inputContainerStyle={[styles.inputContainerStyle, {height: (height * 0.08) + 12}]}
-            onChangeText={setKeterangan}
-            value={keterangan}
-            placeholder='Keterangan penggunaan'
-            selectTextOnFocus={true}
+            inputContainerStyle={styles.inputContainerStyle}
+            value={job_description}
           />
         </View>
       </View>
@@ -230,7 +281,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   inputStyle: {
-    fontSize: 12
+    fontSize: 12,
+    color: '#000'
   },
   textStyle: {
     fontSize: 14,
@@ -238,6 +290,12 @@ const styles = StyleSheet.create({
   },
   skeletonStyle: {
     backgroundColor: '#85929E'
+  },
+  dropdownStyle: {
+    borderColor: '#D7DBDD',
+    width: '95%', // width * 0.9 + 16,
+    marginLeft: 8,
+    // marginRight: 50
   },
   btnStyle: {
     width: width * 0.85, 

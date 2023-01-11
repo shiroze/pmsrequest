@@ -3,21 +3,21 @@ import {ExecuteQuery} from '~/config/db';
 
 import reactotron from 'reactotron-react-native';
 
-export const loadCardStock = async ({itemCode, page}) => {
+export const loadCardStock = async ({item_code, page}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
 
-    var resp = await ExecuteQuery(`SELECT R.TGL_REQUEST,R.RELEASED_DATE,R.NO_ORDER,R.REQUEST_BY,RD.QTY_BEFORE,RD.QTY,RD.QTY_AFTER,P.UOMCODE 
+    let resp = await ExecuteQuery(`SELECT R.TGL_REQUEST,R.RELEASED_DATE,R.NO_ORDER,R.REQUEST_BY,RD.QTY_BEFORE,RD.QTY,RD.QTY_AFTER,P.UOMCODE 
       FROM REQUESTDETAIL RD
       LEFT JOIN REQUEST R ON RD.NO_ORDER=R.NO_ORDER
       INNER JOIN PURCHASEITEM P ON RD.STOCKCODE=P.ITEMCODE
-      WHERE RD.STOCKCODE LIKE '%'
+      WHERE R.RELEASED_BY IS NOT NULL AND RD.STOCKCODE LIKE ? AND RD.REJECTED IS NULL
       ORDER BY R.TGL_REQUEST DESC
-      LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`);
+      LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`, [item_code]);
     // Filter data yang sudah di release
 
     resp.forEach(element => {

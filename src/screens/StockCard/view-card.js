@@ -49,9 +49,9 @@ function ViewItem(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
-        reactotron.log(result);
+        // reactotron.log(result);
 
         if(result.length < 50) {
           setHide(true);
@@ -82,8 +82,8 @@ function ViewItem(props) {
   
   const renderItem = React.useCallback(
     ({ item }) => {
-      var dt = item.dtrans ? item.dtrans.split('/') : '';
-      var dtrans = item.dtrans ? dt[1]+'-'+dt[0]+'-'+dt[2] : moment().format('DD-MM-YYYY');
+      let dt = item.dtrans ? item.dtrans.split('/') : '';
+      let dtrans = item.dtrans ? dt[1]+'-'+dt[0]+'-'+dt[2] : moment().format('DD-MM-YYYY');
 
       return (
         <View style={styles.itemCard}>
@@ -137,7 +137,7 @@ function ViewItem(props) {
       <View style={[styles.card, styles.borderStyle, {borderBottomWidth: .875}]}>
         <Text style={styles.textStyle}>Kode: {itemData ? itemData.itemCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Spec: {itemData ? itemData.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={[styles.textStyle, {position: 'absolute', right: 10, top: 10, fontSize: 18, fontWeight: '800'}]}>{itemData ? (itemData.stock +" "+ itemData.uomCode) : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+        <Text style={[styles.textStyle, {position: 'absolute', right: 10, top: 10, fontSize: 18, fontWeight: '800'}]}>{itemData ? (itemData.actual_stock +" "+ itemData.uomCode) : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
       </View>
       <View style={[styles.borderStyle, {flexDirection: 'row', padding: 4, marginTop: 4, marginLeft: 16}]}>
         <Text style={[styles.fontStyle, {width: '38%', fontWeight: '800'}]}>Tanggal Pengeluaran</Text>

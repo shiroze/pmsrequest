@@ -7,7 +7,7 @@ import issueSaga from './modules/issue/saga';
 // import commonSaga from './modules/common/saga';
 // import orderSaga from './modules/order/saga';
 // import vendorSaga from './modules/vendor/saga';
-// import checkoutSaga from './modules/checkout/saga';
+import SyncSaga from './modules/sync/saga';
 
 /**
  * Root saga
@@ -23,6 +23,7 @@ export default function* rootSagas() {
     orderSaga(),
     // vendorSaga(),
     issueSaga(),
-    approvalSaga()
+    approvalSaga(),
+    SyncSaga(),
   ]);
 }

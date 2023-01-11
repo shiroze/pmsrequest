@@ -3,7 +3,8 @@ export const rootSwitch = {
   main: 'MainStack',
   search: 'Search',
   account: 'Account',
-  sync_page: 'SyncPage'
+  sync_page: 'SyncPage',
+  synchronize: 'Synchronize',
 };
 
 export const mainStack = {
@@ -23,7 +24,8 @@ export const mainStack2 = {
 export const homeStack = {
   home: 'Home',
   list_item: 'ListItem',
-  view_item: 'ViewItem'
+  view_item: 'ViewItem',
+  job_detail: 'JobDetail'
 }
 
 export const orderStack = {

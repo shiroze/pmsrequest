@@ -53,7 +53,7 @@ function Home (props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         // reactotron.log(result);
 
@@ -85,7 +85,7 @@ function Home (props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         setRow2(result);
       }
@@ -116,7 +116,7 @@ function Home (props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         reactotron.log(result);
 
@@ -140,10 +140,10 @@ function Home (props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       // fetchData();
-      await fetchPendingOrder();
-      await fetchSyncSIV().then(async (value) => {
-      //   await fetchMinStock();
-      });
+      // await fetchPendingOrder();
+      // await fetchSyncSIV().then(async (value) => {
+      // //   await fetchMinStock();
+      // });
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -214,7 +214,7 @@ function Home (props) {
             }
           </View>
         </>
-        <>
+        {/* <>
           <Text style={styles.headTitle}>Stock Rendah</Text>
           <View style={styles.itemCard}>
             <View style={{flexDirection: 'row', justifyContent: 'space-evenly'}}>
@@ -223,7 +223,7 @@ function Home (props) {
               <Text style={{width: '25%'}}>Sisa Stock</Text>
             </View>
           </View>
-        </>
+        </> */}
       </ScrollView>
     </Container>
   )

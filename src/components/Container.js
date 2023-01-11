@@ -12,7 +12,7 @@ const Container = ({theme, isFullView, style, children, hideDrop, ...rest}) => {
             backgroundColor: '#FFF',
           },
           isFullView && {flex: 1},
-          style && style,
+          style ? style : null,
         ])}
       >
         {children}

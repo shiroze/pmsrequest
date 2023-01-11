@@ -28,9 +28,8 @@ moment.locale('id-ID');
 
 function ViewApproval(props) {
   const {navigation, route, dispatch, auth, access, branch_id} = props;
-  const {id, dtrans, requestBy, order_status} = route.params;
+  const {itemData, dtrans} = route.params;
   const [allow, setAllow] = useState(false);
-  var approveStage = order_status == 'pending' ? 0 : order_status == 'asisten' ? 1 : 2;
   
   const [list, setList] = useState([]);
 
@@ -45,7 +44,7 @@ function ViewApproval(props) {
       if(data.error) {
         throw Error(data.message);
       } else {
-        var result = data.data;
+        let result = data.data;
         // reactotron.log(result);
 
         setList(result);
@@ -63,17 +62,16 @@ function ViewApproval(props) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      fetchData(id);
-      if(approveStage == 0 && access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && val.allow == 'Y')) {
+      fetchData(itemData.no_order);
+      if(itemData.approve_stage == 0 && access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && val.allow == 'Y')) {
         setAllow(true);
-      } else if(approveStage == 1 && access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && val.allow == 'Y')) {
+      } else if(itemData.approve_stage == 1 && access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && val.allow == 'Y')) {
         setAllow(true);
       } else {
         setAllow(false);
       }
+      // reactotron.log(itemData.approve_stage);
     });
-
-    reactotron.log(access);
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
@@ -88,17 +86,17 @@ function ViewApproval(props) {
     []
   )
   const renderItem = React.useCallback(
-    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc'}]} 
-      onPress={() => {
-        allow ?
-        navigation.navigate(approvalStack.detail_approval, {id, item}) : reactotron.log("Not Allowed")
+    ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 1) ? '#ffc7c7' : '#c7ffdc'}]} 
+      onPress={async () => {
+        // reactotron.log(item);
+        navigation.navigate(approvalStack.detail_approval, {id: itemData.no_order, item, approveStage: itemData.approve_stage});
       }}
     >
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
-        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: (item.rejected && item.rejected == 'Y') ? '#ffc7c7' : '#c7ffdc', textAlign: 'center'}]}>
+        <Text style={[styles.fontStyle, {width: '25%', backgroundColor: (item.rejected && item.rejected == 1) ? '#ffc7c7' : '#c7ffdc', textAlign: 'center'}]}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.qty || 0}</Text>
           {" "+item.uomCode}
         </Text>
@@ -119,7 +117,7 @@ function ViewApproval(props) {
       stage=2;
     }
 
-    dispatch(localAppOrder({branch_id, id, username: auth.user.userName, stage}));
+    dispatch(localAppOrder({branch_id, id: itemData.no_order, username: auth.user.userName, stage}));
     // reactotron.log(access);
   }
 
@@ -133,15 +131,15 @@ function ViewApproval(props) {
         </View>
         <View style={{width: '30%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>No Order</Text>
-          <Text>{id}</Text>
+          <Text>{itemData.no_order}</Text>
         </View>
         <View style={{width: '25%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Pemohon</Text>
-          <Text>{requestBy}</Text>
+          <Text>{itemData.requestBy}</Text>
         </View>
         <View style={{width: '20%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Status</Text>
-          <Text>{order_status}</Text>
+          <Text>{itemData.order_status}</Text>
         </View>
       </View>
       <FlatList 
@@ -149,7 +147,8 @@ function ViewApproval(props) {
         renderItem={renderItem}
       />
       {
-        allow && (
+        (allow && list.filter(val => val.rejected == null).length > 0) && 
+        (
           <Button 
             radius={18}
             title={'Approve'}

@@ -82,7 +82,7 @@ function EditOrderItem(props) {
        * Update Qty jika barang yang sama dipilih
        * Timpa Qty lama
        */
-      var index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
+      let index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
       newArrayList[index].qty = item.qty;
 
       dispatch(addToCart({payload:newArrayList}));
@@ -110,7 +110,7 @@ function EditOrderItem(props) {
                 <Text style={{color: '#FFF'}}>Batal</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.btnStyle, {width: '40%'}]} onPress={() => {
-                var item = {
+                let item = {
                   itemCode: data.itemCode,
                   itemDescription: data.itemDescription,
                   uomCode: data.uomCode,

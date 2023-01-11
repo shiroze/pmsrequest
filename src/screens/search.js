@@ -47,7 +47,7 @@ function Search(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         // data.forEach(element => {
         //   reactotron.log(element);

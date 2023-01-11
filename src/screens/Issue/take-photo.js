@@ -30,7 +30,7 @@ function TakePhoto(props) {
   const {navigation, route, dispatch, auth, access, branch_id} = props;
   const {id, dtrans, requestBy, order_status} = route.params;
   const [allow, setAllow] = useState(false);
-  var approveStage = order_status == 'pending' ? 0 : order_status == 'asisten' ? 1 : 2;
+  let approveStage = order_status == 'pending' ? 0 : order_status == 'asisten' ? 1 : 2;
   
   const [list, setList] = useState([]);
 
@@ -45,7 +45,7 @@ function TakePhoto(props) {
       if(data.error) {
         throw Error(data.message);
       } else {
-        var result = data.data;
+        let result = data.data;
         // reactotron.log(result);
 
         setList(result);

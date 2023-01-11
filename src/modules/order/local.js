@@ -5,7 +5,7 @@ import reactotron from 'reactotron-react-native';
 
 export const localSaveReq = ({branch_id,user,cart}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
@@ -14,15 +14,15 @@ export const localSaveReq = ({branch_id,user,cart}) => {
     /**
      * @FORMAT BRANCH/YEAR/MONTH/INC
      */
-    var query1 = await ExecuteQuery(`SELECT NO_ORDER FROM REQUEST ORDER BY NO_ORDER DESC LIMIT 1`);
+    let query1 = await ExecuteQuery(`SELECT NO_ORDER FROM REQUEST ORDER BY NO_ORDER DESC LIMIT 1`);
 
     /**
      * Generate No Order
      */
-    var today = new Date();
-    var year = today.getFullYear().toString();
+    let today = new Date();
+    let year = today.getFullYear().toString();
     year = year.substring(2,year.length);
-    var month = today.getMonth()+1;
+    let month = today.getMonth()+1;
     month = (month < 10 ? '0' : '') + month;
     let resNo = query1.length > 0 ? query1[0].NO_ORDER : '';
     let no = query1.length == 0 ? 1 : parseInt(resNo.split('/')[3])+parseInt(1);
@@ -33,11 +33,11 @@ export const localSaveReq = ({branch_id,user,cart}) => {
     let isApprove = user.accessRight.some(e => e.namaSubmodul == "APPROVE STAGE 1" && e.allow == "Y");
 
     try {
-      var sp_query = `INSERT INTO REQUEST(NO_ORDER, TGL_REQUEST, REQUEST_BY,APPROVE_1,APPROVE_1_BY,APPROVE_1_DATE) VALUES('${no_order}', strftime('%m/%d/%Y','now'), '${user.userName}',${isApprove ? 1 : 0},'${user.userName}',${isApprove ? "strftime('%m/%d/%Y','now')" : 'NULL'})`;
-      var scQuery = 'INSERT INTO REQUESTDETAIL(NO_ORDER,STOCKCODE,QTY_BEFORE,QTY,QTY_AFTER,KETERANGAN) VALUES';
+      let sp_query = `INSERT INTO REQUEST(NO_ORDER, TGL_REQUEST, REQUEST_BY,APPROVE_1,APPROVE_1_BY,APPROVE_1_DATE) VALUES('${no_order}', strftime('%m/%d/%Y','now'), '${user.userName}',${isApprove ? 1 : 0},'${user.userName}',${isApprove ? "strftime('%m/%d/%Y','now')" : 'NULL'})`;
+      let scQuery = 'INSERT INTO REQUESTDETAIL(NO_ORDER,STOCKCODE,QTY_BEFORE,QTY,QTY_AFTER,KETERANGAN) VALUES';
 
       for(let element of cart) {
-        var curStock = await ExecuteQuery(`SELECT QTYONHAND+QTYHOLD AS STOCK FROM STORESTOCK WHERE ITEMCODE='${element.itemCode}'`);
+        let curStock = await ExecuteQuery(`SELECT QTYONHAND+QTYHOLD AS STOCK FROM STORESTOCK WHERE ITEMCODE='${element.itemCode}'`);
 
         /**
          * Check Stock apakah available
@@ -51,8 +51,8 @@ export const localSaveReq = ({branch_id,user,cart}) => {
 
       scQuery = scQuery.replace(/.$/,";");
 
-      reactotron.log(sp_query);
-      reactotron.log(scQuery);
+      // reactotron.log(sp_query);
+      // reactotron.log(scQuery);
 
       await ExecuteQuery(sp_query);
       await ExecuteQuery(scQuery);
@@ -70,26 +70,26 @@ export const localSaveReq = ({branch_id,user,cart}) => {
 
 // export const localSaveReq = ({branch_id,username, cart}) => {
 //   return new Promise(async (resolve, reject) => {
-//     var result = {
+//     let result = {
 //       error: false,
 //       data: [],
 //       message: ""
 //     };
 
-//     var sp_query = '';
+//     let sp_query = '';
 
 //     /**
 //      * @FORMAT BRANCH/YEAR/MONTH/INC
 //      */
-//     var query1 = await ExecuteQuery(`SELECT NO_ORDER FROM REQUEST ORDER BY NO_ORDER DESC LIMIT 1`);
+//     let query1 = await ExecuteQuery(`SELECT NO_ORDER FROM REQUEST ORDER BY NO_ORDER DESC LIMIT 1`);
 
 //     /**
 //      * Generate No Order
 //      */
-//     var today = new Date();
-//     var year = today.getFullYear().toString();
+//     let today = new Date();
+//     let year = today.getFullYear().toString();
 //     year = year.substring(2,year.length);
-//     var month = today.getMonth()+1;
+//     let month = today.getMonth()+1;
 //     month = (month < 10 ? '0' : '') + month;
 //     let resNo = query1.length > 0 ? query1[0].NO_ORDER : '';
 //     let no = query1.length == 0 ? 1 : parseInt(resNo.split('/')[3])+parseInt(1);
@@ -110,10 +110,10 @@ export const localSaveReq = ({branch_id,user,cart}) => {
 //             /**
 //              * Check Stock apakah available
 //              */
-//             var curStock = tx.executeSql(`SELECT QTYONHAND+QTYHOLD AS STOCK FROM STORESTOCK WHERE ITEMCODE='${element.itemCode}'`, [], (tx2, results) => {
-//               var resp = [];
+//             let curStock = tx.executeSql(`SELECT QTYONHAND+QTYHOLD AS STOCK FROM STORESTOCK WHERE ITEMCODE='${element.itemCode}'`, [], (tx2, results) => {
+//               let resp = [];
 //               return new Promise((resolve, reject) => {
-//                 var len = results.rows.length;
+//                 let len = results.rows.length;
 //                 if(len == 0) {
 //                   resolve(resp);
 //                 }
@@ -151,7 +151,7 @@ export const localSaveReq = ({branch_id,user,cart}) => {
 
 export const localSaveItem = ({id, itemCode, qty, keterangan}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""

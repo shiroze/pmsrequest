@@ -24,13 +24,13 @@ function Search(props) {
 
   const [list, setList] = useState([]);
   const [subList, setSubList] = useState([]);
-  const [start, setStart] = useState(1);
-  const [end, setEnd] = useState(50);
+  // const [start, setStart] = useState(1);
+  // const [end, setEnd] = useState(50);
   const [hide, setHide] = useState(false);
   const [subgroupName, setSubGroup] = useState("");
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async (start, end) => {
+  const fetchData = async (page) => {
     try {
       /**
        * @param groupName : group name
@@ -38,7 +38,7 @@ function Search(props) {
        * @param start : start page
        * @param end : end page
        */
-      const {data} = await searchMaterial({branch_id,query: keyword,start,end});
+      const {data} = await searchMaterial({branch_id, query: keyword, page});
       reactotron.log("Ini mencari Stock Weee !");
       if(data.error) {
         throw Error(data.message);
@@ -46,7 +46,7 @@ function Search(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         // data.forEach(element => {
         //   reactotron.log(element);
@@ -93,10 +93,10 @@ function Search(props) {
    * Fungsi disini untuk menload data ketika pagination
    */
   React.useLayoutEffect(() => {
-    if(start != 1 && end != 50) {
+    if(page != 1) {
       fetchData(start, end);
     }
-  }, [start, end]);
+  }, [page]);
 
   const getItemLayout = React.useCallback(
     (data, index) => ({
@@ -124,8 +124,9 @@ function Search(props) {
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])
   
   const _nextPage = async () => {
-    setStart(end+1);
-    setEnd(end+50);
+    // setStart(end+1);
+    // setEnd(end+50);
+    setPage(page+1);
     setLoading(true);
   }
 

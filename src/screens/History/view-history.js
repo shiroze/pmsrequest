@@ -47,7 +47,7 @@ function ViewHistory(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         let listData = list;
         let cData = listData.concat(result);

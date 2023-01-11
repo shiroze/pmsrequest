@@ -9,7 +9,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {authSelector,locationSelector} from '~/modules/auth/selectors';
+import {authSelector,accessSelector,locationSelector} from '~/modules/auth/selectors';
 // import {getMaterialbyID} from '~/modules/common/service';
 import {getMaterialbyID} from '~/modules/common/local';
 import {saveItem, localSaveItem} from '~/modules/order/actions';
@@ -24,8 +24,8 @@ import moment from 'moment/min/moment-with-locales';
 const {height, width} = Dimensions.get('window');
 
 function DetailApproval(props) {
-  const {navigation, route, dispatch, auth, branch_id} = props;
-  const {id, item} = route.params;
+  const {navigation, route, dispatch, auth, access, branch_id} = props;
+  const {id, item, approveStage} = route.params;
 
   const [data, setData] = useState();
   const [visible, setVisible] = useState(false);
@@ -33,6 +33,7 @@ function DetailApproval(props) {
   const [type, setType] = useState(1);
   const [keterangan, setKeterangan] = useState("");
   const [alasan, setAlasan] = useState("");
+  const [allow, setAllow] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -47,7 +48,7 @@ function DetailApproval(props) {
       if(data.error) {
         throw Error(data.message);
       } else {
-        var result = data.data;
+        let result = data.data;
 
         setData(result[0]);
         
@@ -68,6 +69,17 @@ function DetailApproval(props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       fetchData();
+      if(item.rejected && item.rejected == 1) {
+        setAllow(false);
+      } else {
+        if(approveStage == 0 && access.some(val => val.namaSubmodul == "APPROVE STAGE 1" && val.allow == 'Y')) {
+          setAllow(true);
+        } else if(approveStage == 1 && access.some(val => val.namaSubmodul == "APPROVE STAGE 2" && val.allow == 'Y')) {
+          setAllow(true);
+        } else {
+          setAllow(false);
+        }
+      }
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -120,7 +132,7 @@ function DetailApproval(props) {
               // position: 'absolute', left: 0, right: 0, bottom: 12, 
               alignContent: 'center'}}>
               <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#098438', width: '40%'}]} onPress={() => {
-                var item = {
+                let item = {
                   itemCode: data.itemCode,
                   itemDescription: data.itemDescription,
                   uomCode: data.uomCode,
@@ -175,10 +187,11 @@ function DetailApproval(props) {
         <Text style={styles.textStyle}>Kode: {data ? data.itemCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Nama Barang: {data ? data.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Satuan: {data ? data.uomCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={styles.textStyle}>Kuantiti Tersedia: {data ? data.stock : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+        <Text style={styles.textStyle}>Kuantiti Tersedia: {data ? ((item.rejected && item.rejected == 1) ? data.stock : (data.stock + qty)) : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <View style={{flexDirection: 'row'}}>
           <Text style={styles.textStyle}>Kuantiti Diminta: </Text>
           <Input 
+            disabled={!allow}
             placeholder='Kuantiti Diminta'
             containerStyle={{width: width*0.5}}
             inputStyle={styles.inputStyle}
@@ -202,6 +215,7 @@ function DetailApproval(props) {
         <View style={{flexDirection: 'row'}}>
           <Text style={styles.textStyle}>Keterangan Penggunaan: </Text>
           <Input 
+            disabled={!allow}
             multiline
             numberOfLines={5}
             textAlignVertical={'top'}
@@ -215,7 +229,7 @@ function DetailApproval(props) {
           />
         </View>
       </View>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between', margin: 16}}>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between', margin: 16, display: !allow ? 'none' : 'flex'}}>
         <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#008031'}]} onPress={() => {
           if(qty != 0 && data.stock > qty) {
             toggleOverlay(1);
@@ -287,6 +301,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     auth: authSelector(state),
+    access: accessSelector(state),
     branch_id: locationSelector(state),
   };
 };

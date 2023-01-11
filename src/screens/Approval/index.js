@@ -50,7 +50,7 @@ function Approval(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
         if(result.length < 50) {
           setHide(true);
         } else {
@@ -106,13 +106,13 @@ function Approval(props) {
   )
   const renderItem = React.useCallback(
     ({ item, index }) => {
-      var unfrmt = item.dtrans.split('/');
+      let unfrmt = item.dtrans.split('/');
       let dtrans = unfrmt[2]+'-'+unfrmt[0]+'-'+unfrmt[1];
 
       return (
         <TouchableOpacity style={styles.itemCard} 
           onPress={() => {
-            navigation.navigate(approvalStack.view_approval, {id: item.no_order, dtrans, requestBy: item.requestBy, order_status: item.order_status});
+            navigation.navigate(approvalStack.view_approval, {itemData: item, dtrans});
           }}
         >
           <Text>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>

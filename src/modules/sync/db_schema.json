@@ -1,0 +1,86 @@
+[
+  {
+    "NAME" : "MODULE",
+    "COLUMN": ["CODE", "NAME", "SEQUENCE"],
+    "API_NAME": "sync_module",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": false
+  },
+  {
+    "NAME" : "SUBMODULE",
+    "COLUMN": ["CODE", "NAME", "CLASSNAME", "MODULE", "SEQUENCE", "PARAMETER1", "PARAMETER2", "PARAMETER3", "PARAMETER4"],
+    "API_NAME": "sync_submodule",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": false
+  },
+  {
+    "NAME" : "ACCESSRIGHTS",
+    "COLUMN": ["LOGINID", "MODULECODE", "SUBMODULECODE", "AUTHORIZED"],
+    "API_NAME": "sync_accessrights",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": false
+  },
+  {
+    "NAME" : "USERPROFILE",
+    "COLUMN": ["LOGINID", "PASSWORD", "FULLNAME", "DEPARTMENT", "ACCESSRIGHTS", "OLD_PASSWORD"],
+    "API_NAME": "sync_user",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": false
+  },
+  {
+    "NAME" : "JOB",
+    "COLUMN": ["JOBCODE", "JOBDESCRIPTION", "JOBGROUPCODE", "JOBTYPE", "ACCOUNTCODE", "RATE", "PRODUCT", "UNITOFMEASURE", "GL_SEQUENCE", "STATUS"],
+    "API_NAME": "sync_job",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": true
+  },
+  {
+    "NAME" : "LOCATION",
+    "COLUMN": ["LOCATIONCODE", "LOCATIONTYPECODE", "DESCRIPTION"],
+    "API_NAME": "sync_location",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": true
+  },
+  {
+    "NAME" : "LOCATIONTYPE",
+    "COLUMN": ["LOCATIONTYPECODE", "LOCATIONTYPENAME"],
+    "API_NAME": "sync_locationtype",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": true
+  },
+  {
+    "NAME" : "STOCKGROUP",
+    "COLUMN": ["GROUPCODE", "GROUPDESCRIPTION", "CONTROLJOB"],
+    "API_NAME": "sync_stockgroup",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": true
+  },
+  {
+    "NAME" : "PURCHASEITEM",
+    "COLUMN": ["ITEMCODE", "ITEMTYPE", "ITEMDESCRIPTION", "UOMCODE", "STOCKGROUPCODE", "AVERAGEPRICE", "GRN", "UNITCODE"],
+    "API_NAME": "sync_item",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": true
+  },
+  {
+    "NAME" : "REQUEST",
+    "COLUMN": ["ID", "NO_ORDER", "TGL_REQUEST", "REQUEST_BY", "APPROIVE_1", "APPROIVE_1_BY", "APPROIVE_1_DATE", "APPROIVE_2", "APPROIVE_2_BY", "APPROIVE_2_DATE", "POSTED_DATE", "TAKEN_BY", "UPLOADED", "SIVCODE"],
+    "API_NAME": "sync_request",
+    "SYNC_TYPE": "POST",
+    "ALLOWED": false
+  },
+  {
+    "NAME" : "REQUESTDETAIL",
+    "COLUMN": ["ITEMCODE", "ITEMTYPE", "ITEMDESCRIPTION", "UOMCODE", "STOCKGROUPCODE", "AVERAGEPRICE", "GRN", "UNITCODE"],
+    "API_NAME": "sync_request_detail",
+    "SYNC_TYPE": "POST",
+    "ALLOWED": false
+  },
+  {
+    "NAME" : "STORESTOCK",
+    "COLUMN": ["STORECODE", "ITEMCODE", "QTYONHAND", "QTYHOLD"],
+    "API_NAME": "sync_stock",
+    "SYNC_TYPE": "GET",
+    "ALLOWED": true
+  }
+]

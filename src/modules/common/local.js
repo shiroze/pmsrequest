@@ -6,15 +6,15 @@ import reactotron from 'reactotron-react-native';
 /**
  * Start for Default User
  */
-export const loadItemGroup = async ({}) => {
+export const loadItemGroup = async () => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
 
-    var resp = await ExecuteQuery(`SELECT GROUPNAME, COUNT(SUBGROUP) SUBGROUPCOUNT FROM (
+    let resp = await ExecuteQuery(`SELECT GROUPNAME, COUNT(SUBGROUP) SUBGROUPCOUNT FROM (
       SELECT *,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP
@@ -35,13 +35,13 @@ export const loadItemGroup = async ({}) => {
 
 export const loadSubGroup = async ({groupName}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
 
-    var resp = await ExecuteQuery(`SELECT GROUPNAME, SUBGROUP FROM (
+    let resp = await ExecuteQuery(`SELECT GROUPNAME, SUBGROUP FROM (
       SELECT *,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP
@@ -64,20 +64,20 @@ export const loadSubGroup = async ({groupName}) => {
 
 export const getMaterial = async ({groupName, subgroupName, page, query}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
-    var queryStr = "";
+    let queryStr = "";
     
-    var newSB = subgroupName || '';
+    let newSB = subgroupName || '';
   
     if(newSB == "") {
       queryStr = `SELECT A.*, 
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
-      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, IFNULL(C.QTYONHAND,0) CUR_STOCK,
       CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
       FROM PURCHASEITEM A
       LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
@@ -87,7 +87,7 @@ export const getMaterial = async ({groupName, subgroupName, page, query}) => {
       queryStr = `SELECT A.*, 
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
-      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, IFNULL(C.QTYONHAND,0) CUR_STOCK,
       CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
       FROM PURCHASEITEM A
       LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
@@ -96,7 +96,7 @@ export const getMaterial = async ({groupName, subgroupName, page, query}) => {
       TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) LIKE '%${newSB}%'`;
     }
 
-    var resp = await ExecuteQuery(`SELECT * FROM (
+    let resp = await ExecuteQuery(`SELECT * FROM (
         ${queryStr}
       ) WHERE GROUPNAME=? AND
       QTYONHAND > 0 AND
@@ -113,6 +113,7 @@ export const getMaterial = async ({groupName, subgroupName, page, query}) => {
         uomCode: element.UOMCODE,
         // C
         stock: element.QTYONHAND,
+        actual_stock: element.CUR_STOCK,
         warehouse: element.STORECODE
       });
     });
@@ -123,16 +124,16 @@ export const getMaterial = async ({groupName, subgroupName, page, query}) => {
 
 export const getMaterialbyID = ({item_code}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
     
-    var resp = await ExecuteQuery(`SELECT A.*,
+    let resp = await ExecuteQuery(`SELECT A.*,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
       CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
-      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, 
+      IFNULL(C.QTYONHAND,0)-IFNULL(C.QTYHOLD,0) QTYONHAND, IFNULL(C.QTYONHAND,0) CUR_STOCK,
       CASE WHEN C.STORECODE IS NULL THEN 'ST1' ELSE C.STORECODE END STORECODE
       FROM PURCHASEITEM A
       LEFT JOIN STOCKGROUP B ON A.STOCKGROUPCODE=B.GROUPCODE
@@ -150,6 +151,7 @@ export const getMaterialbyID = ({item_code}) => {
         uomCode: element.UOMCODE,
         // C
         stock: element.QTYONHAND,
+        actual_stock: element.CUR_STOCK,
         warehouse: element.STORECODE
       });
     });
@@ -160,17 +162,17 @@ export const getMaterialbyID = ({item_code}) => {
 
 export const searchMaterial = ({query, page}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
 
-    var keyword = query.split(':');
-    var searchGroup = query.includes(':') ? keyword[0] : '%';
-    var searchName = query.includes(':') ? keyword[1] : query;
+    let keyword = query.split(':');
+    let searchGroup = query.includes(':') ? keyword[0] : '%';
+    let searchName = query.includes(':') ? keyword[1] : query;
     
-    var resp = await ExecuteQuery(`SELECT * FROM (
+    let resp = await ExecuteQuery(`SELECT * FROM (
         SELECT A.*, 
         CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN GROUPDESCRIPTION ELSE TRIM(substr(GROUPDESCRIPTION,0,instr(GROUPDESCRIPTION,','))) END GROUPNAME,
         CASE instr(GROUPDESCRIPTION,',') WHEN 0 THEN NULL ELSE TRIM(substr(GROUPDESCRIPTION,instr(GROUPDESCRIPTION,',')+1,length(GROUPDESCRIPTION))) END SUBGROUP,
@@ -202,22 +204,118 @@ export const searchMaterial = ({query, page}) => {
   });
 }
 
+export const getLocationType = ({}) => {
+  return new Promise(async (resolve, reject) => {
+    let result = {
+      error: false,
+      data: [],
+      message: ""
+    };
+
+    let resp = await ExecuteQuery(`SELECT * FROM LOCATIONTYPE ORDER BY LOCATIONTYPENAME`);
+
+    resp.forEach(element => {
+      result.data.push({
+        loc_type: element.LOCATIONTYPECODE,
+        loc_name: element.LOCATIONTYPENAME
+      });
+    });
+
+    resolve({data: result});
+  });
+}
+
+export const getLocationCode = ({loc_type, keyword, page}) => {
+  return new Promise(async (resolve, reject) => {
+    let result = {
+      error: false,
+      data: [],
+      message: ""
+    };
+
+    let query = `SELECT * FROM LOCATION
+    WHERE LOCATIONTYPECODE = ?`;
+
+    if(keyword != '') {
+      query += ` AND DESCRIPTION LIKE '%${keyword}%'`;
+    } else {
+      query += ` AND DESCRIPTION <> ''`;
+    }
+
+    let resp = await ExecuteQuery(`${query}
+    ORDER BY LOCATIONCODE
+    LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`, [loc_type]);
+
+    resp.forEach(element => {
+      result.data.push({
+        loc_code: element.LOCATIONCODE,
+        description: element.DESCRIPTION
+      });
+    });
+
+    resolve({data: result});
+  });
+}
+
+export const getJobCode = ({keyword, page}) => {
+  return new Promise(async (resolve, reject) => {
+    let result = {
+      error: false,
+      data: [],
+      message: ""
+    };
+
+    /*
+    * JOBGROUPCODE
+    *	1020000, 1200000, 1210000, 1240000, 4201000, 
+    * 4501000, 4701000, 4702000, 4801000
+    * 
+    * 1049999, 1058888, 1200903, 4201002, 4201003,
+    * 4501024, 4501025, 4501026, 4501027, 4501031
+    * 4502002, 4502004, 4701001, 4702002
+    * 
+    * 1020000, 1200000, 4201000, 4501000, 4502000, 4701000, 4702000
+    */
+    let query = `SELECT * FROM JOB
+    WHERE STATUS=0`;
+
+    if(keyword != '') {
+      query += ` AND (JOBDESCRIPTION LIKE '%${keyword}%' OR JOBCODE LIKE '%${keyword}%')`;
+    } else {
+      query += ` AND JOBGROUPCODE IN ('1020000', '1200000', '4201000', '4501000', '4502000', '4701000', '4702000')`;
+    }
+
+    let resp = await ExecuteQuery(`${query}
+    ORDER BY JOBCODE
+    LIMIT 50 OFFSET ${page == 1 ? 0 : ((page-1) * 50)}`);
+
+    resp.forEach(element => {
+      result.data.push({
+        job_code: element.JOBCODE,
+        job_name: element.JOBDESCRIPTION,
+      });
+    });
+
+    resolve({data: result});
+  });
+}
+
 /**
  * Start for Advanced User
  */
 export const loadPendingOrder = async ({init = 0, start = 0, end = 50}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
-    var whereCond = '';
+    let whereCond = '';
     if(init == 1) {
       whereCond = 'LIMIT 10';
     }
 
-    var resp = await ExecuteQuery(`SELECT APPROVE_2_DATE,NO_ORDER,REQUEST_BY,
+    let resp = await ExecuteQuery(`SELECT APPROVE_2_DATE,NO_ORDER,REQUEST_BY,
         CASE WHEN APPROVE_1 IS NULL THEN 'pending'
         WHEN APPROVE_1='Y' AND APPROVE_2 IS NULL THEN 'asisten'
         WHEN APPROVE_1='Y' AND APPROVE_2='Y' THEN 'approved'
@@ -245,17 +343,17 @@ export const loadPendingOrder = async ({init = 0, start = 0, end = 50}) => {
 
 export const loadSyncSIV = async ({init = 0, start = 0, end = 50}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
-    var whereCond = '';
+    let whereCond = '';
     if(init == 1) {
       whereCond = 'LIMIT 10';
     }
 
-    var resp = await ExecuteQuery(`SELECT 
+    let resp = await ExecuteQuery(`SELECT 
       SIVDT,
       COUNT(ASV.SIVCODE) JlhSIV,
       COUNT(REQ.SIVCODE) JlhREQ
@@ -288,17 +386,17 @@ export const loadSyncSIV = async ({init = 0, start = 0, end = 50}) => {
 
 export const loadMinStock = async ({init = 0, start = 0, end = 50}) => {
   return new Promise(async (resolve, reject) => {
-    var result = {
+    let result = {
       error: false,
       data: [],
       message: ""
     };
-    var whereCond = '';
+    let whereCond = '';
     if(init == 1) {
       whereCond = 'LIMIT 10';
     }
 
-    var resp = await ExecuteQuery(`SELECT B.*,A.QTYONHAND FROM STORESTOCK A
+    let resp = await ExecuteQuery(`SELECT B.*,A.QTYONHAND FROM STORESTOCK A
     INNER JOIN PURCHASEITEM B ON A.ITEMCODE=B.ITEMCODE
     WHERE A.QTYONHAND <= B.MIN_STOCK + 5`);
 

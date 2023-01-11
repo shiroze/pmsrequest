@@ -12,21 +12,8 @@ import {signOut} from '~/modules/auth/actions';
 import { connect } from 'react-redux';
 import reactotron from 'reactotron-react-native';
 
-import SQLite from 'react-native-sqlite-storage';
-import { showMessage } from 'react-native-flash-message';
-
 function Account(props) {
   const {navigation, dispatch} = props;
-
-  const reInitSQL = () => {
-    SQLite.deleteDatabase(
-      {name: 'db_pms.db'},  
-      () => { reactotron.log('db deleted'); },
-      error => { reactotron.log("ERROR: " + error); }
-    );
-
-    dispatch(signOut({expired: false}));
-  }
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>

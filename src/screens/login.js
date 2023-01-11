@@ -12,17 +12,22 @@ import {
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 import { Button, Input } from '@rneui/base';
-import { Icon, ThemeConsumer } from '@rneui/themed';
+import { Icon, ThemeConsumer, Text, LinearProgress } from '@rneui/themed';
 
 import DropDownPicker from 'react-native-dropdown-picker';
+
+import {rootSwitch} from '~/config/navigator';
 
 import { connect } from 'react-redux';
 
 import {signIn, localSignIn} from '~/modules/auth/actions';
 import * as Actions from '~/modules/auth/constants';
 import { authSelector,locationSelector } from '~/modules/auth/selectors';
+import {currentModulesSelector, totalModuleDone, totalModule} from '~/modules/sync/selectors';
 
-import {handleError, handleInfo, handleSuccess} from '~/utils/message';
+import { SyncData } from '~/modules/sync/actions';
+
+import {handleError, handleWarning} from '~/utils/message';
 
 import reactotron from 'reactotron-react-native';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -30,6 +35,15 @@ import RNFetchBlob from 'rn-fetch-blob';
 const {width, height} = Dimensions.get('window');
 
 function Login(props) {
+  const {
+    navigation,
+    dispatch,
+    auth,
+    location,
+    current,
+    totalModule, totalModuleDone
+  } = props;
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [open, setOpen] = useState(false);
@@ -43,15 +57,24 @@ function Login(props) {
     {
       value: 'PND',
       label: 'Pabrik Negri Lama Dua (PND)'
+    },
+    {
+      value: 'PGS',
+      label: 'Pabrik Gunung Melayu Satu (PGS)'
+    },
+    {
+      value: 'PGD',
+      label: 'Pabrik Gunung Melayu Dua (PGD)'
+    },
+    {
+      value: 'KSN',
+      label: 'Kebun Sentral Netral (KSN)'
     }
   ]);
 
-  const {
-    navigation,
-    dispatch,
-    auth,
-    location
-  } = props;
+  const [cur_patch, setCurPatch] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [totalData, setTotalData] = useState(0);
 
   const toggleShow = () => {
     setShow(!show);
@@ -66,21 +89,27 @@ function Login(props) {
         //   setValue('PND');
         // }, 1000);
       }
-    });
-    if(location != "") {
-      setValue(location);
-    }
     
-    // if(auth.pending) {
-    //   dispatch({
-    //     type: Actions.SIGN_OUT_SUCCESS
-    //   });
-    // }
-    // reactotron.log(auth);
+      if(auth.pending) {
+        dispatch({
+          type: Actions.SIGN_OUT_SUCCESS
+        });
+      }
+      
+      if(location != "") {
+        setValue(location);
+      }
+    });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation, location]);
+
+  React.useEffect(() => {
+    setCurPatch(current);
+    setProgress(totalModuleDone);
+    setTotalData(totalModule);
+  }, [current, totalModuleDone]);
 
   const _signIn = () => {
     Keyboard.dismiss();
@@ -155,11 +184,48 @@ function Login(props) {
                 <Button
                   radius={20}
                   loading={auth.pending}
-                  disabled={auth.pending}
+                  disabled={current == "" ? auth.pending : true}
                   onPress={_signIn}
                   title={'Sign In'}
                   containerStyle={styles.buttonStyle}
                 />
+                <Button
+                  radius={20}
+                  disabled={current == "" ? false : true}
+                  type={'clear'}
+                  title={'Sync Database'}
+                  titleStyle={{color: '#F5B041'}}
+                  onPress={() => { 
+                    if(value != "" && value != null) {
+                      dispatch(SyncData({branch_id: value}));
+                    } else {
+                      handleWarning({
+                        message: "Cabang tidak boleh kosong"
+                      });
+                    }
+                  }}
+                />
+                {cur_patch != "" ? 
+                  <View style={{ margin: 10, width: width * 0.8, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: '#2ECC71',
+                        marginTop: 10,
+                        textAlign: 'center',
+                        width: '100%'
+                      }}
+                    >{"Sinkronisasi: " + cur_patch}</Text>
+                    <LinearProgress
+                      style={{ margin: 10, width: width * 0.8 }}
+                      value={progress}
+                      animation
+                      trackColor='#F5B041'
+                      variant="determinate"
+                    />
+                    <Text >{progress} / {totalData}</Text>
+                  </View>
+                  : null}
               </View>
             </ImageBackground>
           </TouchableWithoutFeedback>
@@ -229,16 +295,19 @@ const styles = StyleSheet.create({
   },
   buttonStyle: {
     zIndex: 5,
-    marginTop: 24, 
+    marginTop: 18, 
     marginLeft: 8, 
     marginRight: 8
-  }
+  },
 });
 
 const mapStateToProps = (state) => {
   return {
     auth: authSelector(state),
     location: locationSelector(state),
+    current: currentModulesSelector(state),
+    totalModuleDone: totalModuleDone(state),
+    totalModule: totalModule(state),
   };
 };
 

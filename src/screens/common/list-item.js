@@ -54,8 +54,10 @@ function ListItem(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
+        reactotron.log(result);
+        
         if(result.length < 50) {
           setHide(true);
         } else {
@@ -87,7 +89,7 @@ function ListItem(props) {
       if(data.error) {
         throw Error(data.message);
       } else {
-        var result = data.data;
+        let result = data.data;
         if(result.length > 0) {
           setSubList(result);
           /**

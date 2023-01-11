@@ -5,8 +5,8 @@ import reactotron from 'reactotron-react-native';
 const {width, height} = Dimensions.get('window');
 
 const Item = (props) => {
-  const {onPress, branch_id, item} = props;
-
+  const {onPress, branch_id, item, actual} = props;
+  
   return (
     <TouchableOpacity style={styles.itemCard} onPress={onPress}>
       <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
@@ -14,7 +14,7 @@ const Item = (props) => {
         <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '15%'}]}>{item.warehouse}</Text>
         <Text style={[styles.fontStyle, {width: '25%', backgroundColor: '#c7ffdc', textAlign: 'center'}]}>
-          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{item.stock || 0}</Text>
+          <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>{actual ? item.actual_stock : (item.qty || item.stock)}</Text>
           {" "+item.uomCode}
         </Text>
       </View>

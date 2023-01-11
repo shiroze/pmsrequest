@@ -52,7 +52,7 @@ function ListItem(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         if(result.length < 50) {
           setHide(true);
@@ -85,7 +85,7 @@ function ListItem(props) {
       if(data.error) {
         throw Error(data.message);
       } else {
-        var result = data.data;
+        let result = data.data;
         if(result.length > 0) {
           setSubList(result);
           /**
@@ -150,11 +150,12 @@ function ListItem(props) {
   )
   const renderItem = React.useCallback(
     ({ item }) => 
-      <Item 
-        item={item}
-        branch_id={branch_id}
-        onPress={() => navigation.navigate(stockCardStack.view_card, {itemData: item})}
-      />,
+        <Item 
+          item={item}
+          actual={true}
+          branch_id={branch_id}
+          onPress={() => navigation.navigate(stockCardStack.view_card, {itemData: item})}
+        />,
     [],
   )
   const keyExtractor = React.useCallback((item, index) => index.toString(), [])

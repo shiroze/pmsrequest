@@ -1,111 +1,91 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Keyboard, TouchableOpacity, Dimensions } from 'react-native';
-import { LinearProgress } from '@rneui/themed';
+import { View, Text, StyleSheet, Keyboard, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import { Icon, LinearProgress } from '@rneui/themed';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { showMessage } from 'react-native-flash-message';
 
 import Container from '~/components/Container';
 import Header from '~/components/Header';
 
-import {authSelector, locationSelector} from '~/modules/auth/selectors';
-
 import { connect } from 'react-redux';
-import RNFetchBlob from 'rn-fetch-blob';
-import RNFS from 'react-native-fs';
+
+import {locationSelector} from '~/modules/auth/selectors';
+import {SyncUpload, SyncDownload, SyncData} from '~/modules/sync/actions';
+import {currentModulesSelector, totalModuleDone, totalModule} from '~/modules/sync/selectors';
 
 import reactotron from 'reactotron-react-native';
+
+const db_schema = require('~/modules/sync/db_schema.json');
 
 const {height, width} = Dimensions.get('window');
 
 function SyncPage(props) {
-  const {navigation, dispatch, branch_id} = props;
-  const [uploadFile, setUpFile] = useState('');
+  const {navigation, dispatch, branch_id, current, totalModule, totalModuleDone} = props;
   const [progress, setProgress] = useState(0);
   const [totalData, setTotalData] = useState(0);
-  const dirs = RNFetchBlob.fs.dirs;
+  const [list_db, setList] = useState();
 
-  var conversion = (value) => {
-    var temp = "";
-    if (value < 1000) {
-      temp = value + " bytes";
-    } else if (value > 1000 && value < 1000000) {
-      temp = (value/1000).toFixed(2) + " KB";
-    } else if (value > 1000000 && value < 1000000000) {
-      temp = (value/1000000).toFixed(2) + " MB";
-    } else if (value > 1000000000) {
-      temp = (value/1000000000).toFixed(2) + " GB";
+  React.useEffect(() => {
+    let list = db_schema.filter((item) => item.SYNC_TYPE == 'GET');
+    setList(list);
+  }, []);
+
+  React.useEffect(() => {
+    let list = list_db;
+    if (list) {
+      list.find((item) => {
+        if (item.NAME == current) {
+          item.DONE = totalModuleDone == totalModule ? true : false;
+        }
+      });
+      setList(list);
     }
+  }, [current, totalModuleDone]);
 
-    return temp;
-  }
+  React.useEffect(() => {
+    setProgress(totalModuleDone);
+    setTotalData(totalModule);
+  }, [totalModuleDone]);
 
-  var uploadBegin = (response) => {
-    var jobId = response.jobId;
-    reactotron.log('UPLOAD HAS BEGUN! JobId: ' + jobId);
-  };
-
-  var uploadProgress = (response) => {
-    // var percentage = Math.floor((response.totalBytesSent/response.totalBytesExpectedToSend) * 100);
-    setProgress(response.totalBytesSent);
-  };
-
-  const SyncData = async () => {
-    setProgress(0);
-    await RNFetchBlob.fs.stat(dirs.MainBundleDir + '/databases/db_pms.db')
-    .then((stats) => { 
-      setUpFile(stats.path);
-      setTotalData(stats.size);
-    })
-    .catch((err) => {reactotron.log(err)});
-    
-    var dbloc = RNFS.DocumentDirectoryPath.replace('files', 'databases') + '/db_pms.db';
-    // RNFS.stat(dbloc).then((stats) => {
-    //   reactotron.log(stats);
-    // })
-
-    RNFS.uploadFiles({
-      toUrl: `http://172.21.10.242:3000/${branch_id}/api/v1/sync_data`,
-      files: [{name: "filedb", filename: "db_pms.db", filepath: dbloc}],
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        // "Content-Type": "application/octet-stream",
-      },
-      fields: {
-        'branch': branch_id,
-      },
-      begin: uploadBegin,
-      progress: uploadProgress
-    })
-    .promise.then((response) => {
-      if (response.statusCode == 200) {
-        reactotron.log('FILES UPLOADED!'); // response.statusCode, response.headers, response.body
-      } else {
-        reactotron.log('SERVER ERROR');
-      }
-    })
-    .catch((err) => {
-      if(err.description === "cancelled") {
-        // cancelled by user
-      }
-      reactotron.log(err);
-    });
+  const SinkronisasiSemuaData = () => {
+    dispatch(SyncData({branch_id}));
   }
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header goBack={true} {...props} />
-      <TouchableOpacity style={styles.btnSync} onPress={() => SyncData()}>
-        <Text style={{fontSize: 18, color: '#FFF', fontWeight: '600'}}>Sync Data</Text>
-      </TouchableOpacity>
-      <View
-        style={{ margin: 10, width: width * 0.8, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', }}>
-          <LinearProgress
-            style={{ margin: 10, width: width * 0.8 }}
-            value={progress}
-            variant="determinate"
-          />
-          <Text >{conversion(progress)} / {conversion(totalData)}</Text>
+      <Header goBack={false} {...props} />
+      <View style={{flex: 1, width: '100%'}}>
+        <FlatList
+          data={list_db}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item, index}) => {
+            return (
+              <View style={styles.row} key={index}>
+                <Text style={styles.rowText}>{item.NAME}</Text>
+                {
+                  item.DONE ? <Icon name="check" size={20} color="#00ff00" /> : <Icon name="close" size={20} color="#ff0000" />
+                }
+              </View>
+            )
+          }}
+          disableVirtualization
+          showsVerticalScrollIndicator={false}
+        />
+        {/* <TouchableOpacity style={styles.btnSync} onPress={() => SynchronizeData()}>
+          <Text style={{fontSize: 18, color: '#FFF', fontWeight: '600'}}>Sync Data</Text>
+        </TouchableOpacity> */}
+        <View
+          style={{ margin: 10, width: width * 0.8, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', }}>
+            <LinearProgress
+              style={{ margin: 10, width: width * 0.8 }}
+              value={progress}
+              variant="determinate"
+            />
+            <Text >{progress} / {totalData}</Text>
+            <TouchableOpacity style={[styles.btnSync, {backgroundColor: '#2ECC71'}]} onPress={() => SinkronisasiSemuaData()}>
+              <Text style={{fontSize: 14, color: '#FFF', fontWeight: '600', textAlign: 'center'}}>Sinkronisasi Semua Data</Text>
+            </TouchableOpacity>
+        </View>
       </View>
     </Container>
   )
@@ -115,15 +95,23 @@ const styles = StyleSheet.create({
   container: {
     marginTop: getStatusBarHeight(),
   },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 14,
+    borderBottomWidth: 1,
+  },
+  rowText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   btnSync: {
     padding: 12,
-    marginTop: 18,
-    backgroundColor: '#2ECC71',
     width: width * 0.35,
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'center'
   }
 });
 
@@ -132,8 +120,10 @@ const styles = StyleSheet.create({
  */
 const mapStateToProps = (state) => {
   return {
-    auth: authSelector(state),
     branch_id: locationSelector(state),
+    totalModuleDone: totalModuleDone(state),
+    totalModule: totalModule(state),
+    current: currentModulesSelector(state),
   };
 };
 

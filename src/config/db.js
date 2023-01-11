@@ -4,17 +4,17 @@ import reactotron from "reactotron-react-native";
 // SQLite.DEBUG = true;
 // SQLite.enablePromise(false);
 
-export var db = SQLite.openDatabase({name: 'db_pms.db'});
+export let db = SQLite.openDatabase({name: 'db_pms.db'});
 
 export const ExecuteQuery = (sql, params = []) => {
   /**
    * Create empty array
    */
-  var resp = [];
+  let resp = [];
   return new Promise((resolve, reject) => {
     db.transaction((tx) => {
       tx.executeSql(sql,params, (trx, results) => {
-        var len = results.rows.length;
+        let len = results.rows.length;
         if(len == 0) {
           resolve(resp);
         }
@@ -32,3 +32,18 @@ export const ExecuteQuery = (sql, params = []) => {
     });
   });
 };
+
+export const ExecuteMultiQuery = (qArr) => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      qArr.forEach((qry) => {
+        tx.executeSql(qry);
+      });
+    }, (err) => {
+      reactotron.log(err);
+      reject(err);
+    }, () => {
+      resolve(true);
+    });
+  });
+}

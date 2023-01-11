@@ -49,7 +49,7 @@ function History(props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
         if(result.length < 50) {
           setHide(true);

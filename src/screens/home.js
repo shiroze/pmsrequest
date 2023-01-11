@@ -86,22 +86,22 @@ function Home (props) {
         // data.forEach(element => {
         //   reactotron.log(element);
         // });
-        var result = data.data;
+        let result = data.data;
 
-        result.forEach(element => {
-          dataSource.map((item,index) => {
-            if(item.name.toUpperCase() == element.groupName) {
-              var newItem = {
-                name: element.groupName,
-                count: element.subgroupCount,
-                icon_name: item.icon_name,
-                icon_source: item.icon_source
-              };
-              // reactotron.log(newItem);
+        dataSource.sort((a, b) => (a.name > b.name) ? 1 : -1)
+        .forEach(element => {
+          if(result.some(val => element.name.toUpperCase() === val.groupName)) {
+            let item = result.filter(val => element.name.toUpperCase() === val.groupName);
+            let newItem = {
+              name: item[0].groupName,
+              count: item[0].subgroupCount,
+              icon_name: element.icon_name,
+              icon_source: element.icon_source
+            };
+            // reactotron.log(newItem);
 
-              newData.push(newItem);
-            }
-          });
+            newData.push(newItem);
+          }
         });
 
         // reactotron.log(newData);
