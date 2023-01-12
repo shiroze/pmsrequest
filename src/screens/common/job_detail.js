@@ -24,7 +24,6 @@ function JobDetail(props) {
 
   const [filter, setFilter] = useState("");
   const [list, setList] = useState([]);
-  const [extra, setExtra] = useState();
   const [page, setPage] = useState(1);
   const [hide, setHide] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,7 @@ function JobDetail(props) {
        * @param start : start page
        * @param end : end page
        */
-      const {data} = await getLocationType({branch_id});
+      const {data} = await getLocationType({branch_id, keyword: filter});
       
       if(data.error) {
         throw Error(data.message);
@@ -60,10 +59,14 @@ function JobDetail(props) {
           });
         });
 
-        let listData = list;
-        let cData = listData.concat(temp);
-        
-        setList(cData);
+        if(filter == "") {
+          let listData = list;
+          let cData = listData.concat(temp);
+          
+          setList(cData);
+        } else {
+          setList(temp);
+        }
         setLoading(false);
       }
     } catch (error) {
@@ -109,10 +112,14 @@ function JobDetail(props) {
           });
         });
 
-        let listData = list;
-        let cData = listData.concat(temp);
-        
-        setList(cData);
+        if(filter == "") {
+          let listData = list;
+          let cData = listData.concat(temp);
+          
+          setList(cData);
+        } else {
+          setList(temp);
+        }
         setLoading(false);
       }
     } catch (error) {
@@ -160,10 +167,14 @@ function JobDetail(props) {
           });
         });
 
-        let listData = list;
-        let cData = listData.concat(temp);
-        
-        setList(cData);
+        if(filter == "") {
+          let listData = list;
+          let cData = listData.concat(temp);
+          
+          setList(cData);
+        } else {
+          setList(temp);
+        }
         setLoading(false);
       }
     } catch (e) {
@@ -178,26 +189,19 @@ function JobDetail(props) {
     }
   }
 
-  const filterData = (keyword) => {
-    setFilter(keyword);
+  const fetchDataTable = () => {
+    if(tipe == 1) {
+      fetchLocationType();
+    } else if(tipe == 2) {
+      fetchLocationCode();
+    } else {
+      fetchJobCode(page);
+    }
   }
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
-      // fetchData(start, end);
-      if(tipe == 1) {
-        fetchLocationType();
-      } else if(tipe == 2) {
-        fetchLocationCode();
-      } else {
-        fetchJobCode(page);
-      }
-    
-      // navigation.setOptions({
-      //   title: `JobDetail: ${tipe}`,
-      // });
-
-      reactotron.log(route.params);
+      fetchDataTable();
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -209,13 +213,7 @@ function JobDetail(props) {
    */
   React.useLayoutEffect(() => {
     if(page != 1) {
-      if(tipe == 1) {
-        fetchLocationType();
-      } else if(tipe == 2) {
-        fetchLocationCode();
-      } else {
-        fetchJobCode();
-      }
+      fetchDataTable();
     }
   }, [page]);
 
@@ -223,12 +221,6 @@ function JobDetail(props) {
     ({ item }) => <TouchableOpacity style={styles.itemCard} onPress={() => navigation.navigate(homeStack.view_item, {tipe, code: item.name, value: item.id})}>
       <Text>{`${item.id} - ${item.name}`}</Text>
     </TouchableOpacity>,
-    [],
-  )
-  const viewabilityConfig = React.useCallback(
-    { 
-      viewAreaCoveragePercentThreshold: 50 
-    },
     [],
   )
   const _nextPage = async () => {
@@ -244,26 +236,20 @@ function JobDetail(props) {
       <SearchBar
         placeholder='Input keyword'
         round
-        onChangeText={filterData}
+        onChangeText={setFilter}
         value={filter}
         containerStyle={styles.containerStyle}
         inputContainerStyle={styles.inputContainerStyle}
         inputStyle={styles.inputStyle}
         onSubmitEditing={() => {
-          if(tipe == 1) {
-            fetchLocationType();
-          } else if(tipe == 2) {
-            fetchLocationCode();
-          } else {
-            fetchJobCode();
-          }
+          fetchDataTable();
         }}
         returnKeyLabel='Search'
         returnKeyType='search'
       />
       {
         <FlatList 
-          data={extra ? extra : list}
+          data={list}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
           initialNumToRender={list.length}

@@ -18,6 +18,7 @@ import reactotron from 'reactotron-react-native';
 import { connect } from 'react-redux';
 
 import { showMessage } from 'react-native-flash-message';
+import { useFocusEffect } from '@react-navigation/native';
 
 const {height, width} = Dimensions.get('window');
 const ITEM_HEIGHT = (height / 5) + 30;
@@ -114,20 +115,29 @@ function ListItem(props) {
   }
 
   React.useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', async () => {
-      fetchSubgroup(group_name);
-      if(sub_count == 0 && subgroupName == "") {
-        fetchData(group_name, "", page);
-      }
-    });
+    // const unsubscribe = navigation.addListener('focus', async () => {
+    //   fetchSubgroup(group_name);
+    //   if(sub_count == 0 && subgroupName == "") {
+    //     fetchData(group_name, "", page);
+    //   }
+    // });
 
     if(subgroupName && subgroupName != "" && sub_count > 0) {
       fetchData(group_name, subgroupName, page);
     }
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
-    return unsubscribe;
-  }, [navigation, subgroupName]);
+    // return unsubscribe;
+  }, [subgroupName]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSubgroup(group_name);
+      if(sub_count == 0 && subgroupName == "") {
+        fetchData(group_name, "", page);
+      }
+    }, [subgroupName])
+  );
 
   /**
    * Fungsi disini untuk menload data ketika pagination

@@ -18,16 +18,6 @@ const initState = fromJS({
   timeOut: moment().add(2, 'h')
 });
 
-const signOutState = fromJS({
-  isLogin: false,
-  pending: false,
-  user: {},
-  accessRight: List(),
-  username: '',
-  loginError: initError,
-  timeOut: null
-});
-
 export default function authReducer(state = initState, {type, payload}) {
   switch (type) {
     case Actions.SIGN_IN:
@@ -51,7 +41,11 @@ export default function authReducer(state = initState, {type, payload}) {
       const errorSignIn = notificationMessage(payload);
       return state.set('pending', false).set('loginError', fromJS(errorSignIn));
     case Actions.SIGN_OUT_SUCCESS:
-      return signOutState;
+      return state.set('isLogin', false)
+                  .set('pending', false)
+                  .set('user', {})
+                  .set('accessRight', List())
+                  .set('timeout', null);
     default:
       return state;
   }

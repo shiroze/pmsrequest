@@ -57,7 +57,7 @@ export const localDataUpdate = ({data, table, column}) => {
   })
 }
 
-export const localStockUpdate = ({data}) => {
+export const getLocalDataTable = ({table, condition = ''}) => {
   return new Promise(async (resolve, reject) => {
     let result = {
       error: false,
@@ -65,50 +65,9 @@ export const localStockUpdate = ({data}) => {
       message: ""
     };
 
-    await ExecuteQuery(`DELETE FROM STORESTOCK;`);
+    let q = `SELECT * FROM ${table} ${condition};`;
 
-    let scQuery = 'INSERT INTO STORESTOCK(STORECODE,ITEMCODE,QTYONHAND,QTYHOLD) VALUES';
-    for(let element of data) {
-      scQuery += `('${element.STORECODE}', '${element.ITEMCODE}', ${element.QTYONHAND}, ${element.QTYHOLD}),`;
-    }
-
-    scQuery = scQuery.replace(/.$/,";");
-
-    await ExecuteQuery(scQuery);
-
-    resolve({data: result});
-  })
-}
-
-export const getLocalRequest = () => {
-  return new Promise(async (resolve, reject) => {
-    let result = {
-      error: false,
-      data: [],
-      message: ""
-    };
-
-    let resp = await ExecuteQuery(`SELECT * FROM REQUEST WHERE RELEASED_DATE IS NOT NULL AND POSTED_DATE IS NULL;`);
-
-    resp.forEach(element => {
-      result.data.push(element);
-    });
-
-    resolve({data: result});
-  });
-}
-
-export const getLocalRDetail = () => {
-  return new Promise(async (resolve, reject) => {
-    let result = {
-      error: false,
-      data: [],
-      message: ""
-    };
-
-    let resp = await ExecuteQuery(`SELECT RD.* FROM REQUEST R
-    INNER JOIN REQUEST_DETAIL RD ON R.NO_ORDER=RD.NO_ORDER
-    WHERE R.RELEASED_DATE IS NOT NULL AND R.POSTED_DATE IS NULL;`);
+    let resp = await ExecuteQuery(q);
 
     resp.forEach(element => {
       result.data.push(element);

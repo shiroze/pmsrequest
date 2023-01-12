@@ -116,10 +116,14 @@ function Issue(props) {
             navigation.navigate(issueStack.release_item, {itemData: item, dtrans});
           }}
         >
-          <Text>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>
-          <Text>{item.no_order}</Text>
-          <Text>{item.requestBy}</Text>
-          <Text>{item.order_status}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>{item.no_order}</Text>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>{item.order_status}</Text>
+          </View>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 12}}>
+            <Text style={{fontSize: 16}}>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>
+            <Text style={{fontSize: 16}}>Diminta Oleh : {item.requestBy}</Text>
+          </View>
         </TouchableOpacity>
       )
     },
@@ -136,7 +140,7 @@ function Issue(props) {
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header {...props} />
+      <Header title={'Daftar Permintaan'} {...props} />
       {
         <FlatList 
           data={issue}

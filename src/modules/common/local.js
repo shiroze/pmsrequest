@@ -204,7 +204,7 @@ export const searchMaterial = ({query, page}) => {
   });
 }
 
-export const getLocationType = ({}) => {
+export const getLocationType = ({keyword}) => {
   return new Promise(async (resolve, reject) => {
     let result = {
       error: false,
@@ -212,7 +212,15 @@ export const getLocationType = ({}) => {
       message: ""
     };
 
-    let resp = await ExecuteQuery(`SELECT * FROM LOCATIONTYPE ORDER BY LOCATIONTYPENAME`);
+    let query = `SELECT * FROM LOCATIONTYPE`;
+
+    if(keyword != '') {
+      query += ` WHERE LOCATIONTYPECODE LIKE '%${keyword}%'`;
+    } else {
+      query += ` `;
+    }
+
+    let resp = await ExecuteQuery(`${query} ORDER BY LOCATIONTYPENAME`);
 
     resp.forEach(element => {
       result.data.push({
@@ -237,7 +245,7 @@ export const getLocationCode = ({loc_type, keyword, page}) => {
     WHERE LOCATIONTYPECODE = ?`;
 
     if(keyword != '') {
-      query += ` AND DESCRIPTION LIKE '%${keyword}%'`;
+      query += ` AND LOCATIONCODE LIKE '%${keyword}%'`;
     } else {
       query += ` AND DESCRIPTION <> ''`;
     }

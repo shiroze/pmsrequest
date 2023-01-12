@@ -34,7 +34,7 @@ export const localSaveReq = ({branch_id,user,cart}) => {
 
     try {
       let sp_query = `INSERT INTO REQUEST(NO_ORDER, TGL_REQUEST, REQUEST_BY,APPROVE_1,APPROVE_1_BY,APPROVE_1_DATE) VALUES('${no_order}', strftime('%m/%d/%Y','now'), '${user.userName}',${isApprove ? 1 : 0},'${user.userName}',${isApprove ? "strftime('%m/%d/%Y','now')" : 'NULL'})`;
-      let scQuery = 'INSERT INTO REQUESTDETAIL(NO_ORDER,STOCKCODE,QTY_BEFORE,QTY,QTY_AFTER,KETERANGAN) VALUES';
+      let scQuery = 'INSERT INTO REQUESTDETAIL(NO_ORDER,STOCKCODE,QTY_BEFORE,QTY,QTY_AFTER,KETERANGAN,LOCATIONTYPE,LOCATIONCODE,JOBCODE) VALUES';
 
       for(let element of cart) {
         let curStock = await ExecuteQuery(`SELECT QTYONHAND+QTYHOLD AS STOCK FROM STORESTOCK WHERE ITEMCODE='${element.itemCode}'`);
@@ -43,7 +43,7 @@ export const localSaveReq = ({branch_id,user,cart}) => {
          * Check Stock apakah available
          */
         if(curStock[0].STOCK > element.qty) {
-          scQuery += `('${no_order}', '${element.itemCode}', ${curStock[0].STOCK}, ${element.qty}, ${parseInt(curStock[0].STOCK) - parseInt(element.qty)}, '${element.keterangan}'),`;
+          scQuery += `('${no_order}', '${element.itemCode}', ${curStock[0].STOCK}, ${element.qty}, ${parseInt(curStock[0].STOCK) - parseInt(element.qty)}, '${element.keterangan}', '${element.location_type}', '${element.location_code}', '${element.job_code}'),`;
         } else {
           throw new Error(`Stock dengan kode ${element.itemCode} tidak cukup`);
         }

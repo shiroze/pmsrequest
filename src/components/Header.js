@@ -20,23 +20,8 @@ const Header = (props) => {
   const frame = useSafeAreaFrame();
   const insets = useSafeAreaInsets();
   const headerHeight = getDefaultHeaderHeight(frame, false, insets.top) - getStatusBarHeight();
-  let Headertitle = "";
 
   const [search, setSearch] = useState("");
-  
-  // reactotron.log(route);
-
-  switch (route.name) {
-    case "ListItem":
-      Headertitle = title;
-      break;
-    case "ViewItem":
-      Headertitle = title;
-      break;
-    default:
-      Headertitle = route.name;
-      break;
-  }
 
   return (
     <View style={{height: headerHeight, width, flexDirection: 'row', backgroundColor: "#faa634", alignItems: 'center', padding: 8}}>
@@ -57,7 +42,7 @@ const Header = (props) => {
         </>
       ) : (
         <View style={{marginLeft: 12, width: goBack ? (width * 0.75) + 8 : (width * 0.8) + 12}}>
-          <Text style={{fontSize: 22, fontWeight: 'bold', color: '#FFF'}} numberOfLines={1}>{Headertitle}</Text>
+          <Text style={{fontSize: 22, fontWeight: 'bold', color: '#FFF'}} numberOfLines={1}>{title ? title : route.name}</Text>
         </View>
       )}
       {!goBack && <Avatar

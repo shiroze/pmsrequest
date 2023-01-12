@@ -55,10 +55,13 @@ export const getIssuebyID = ({id}) => {
     };
 
     let resp = await ExecuteQuery(`SELECT B.STOCKCODE,
-    C.ITEMDESCRIPTION,B.QTY,C.UOMCODE,B.KETERANGAN,B.REJECTED,B.REJECT_REASON
+    C.ITEMDESCRIPTION,B.QTY,C.UOMCODE,B.KETERANGAN,
+    B.LOCATIONTYPE,B.LOCATIONCODE,B.JOBCODE,J.JOBDESCRIPTION,
+    B.REJECTED,B.REJECT_REASON
     FROM REQUESTDETAIL B
     LEFT JOIN PURCHASEITEM C ON B.STOCKCODE=C.ITEMCODE
     LEFT JOIN STOCKGROUP D ON C.STOCKGROUPCODE=D.GROUPCODE
+    LEFT JOIN JOB J ON B.JOBCODE=J.JOBCODE
     WHERE B.NO_ORDER=? AND B.REJECTED IS NULL`, [id]);
 
     resp.forEach(element => {
@@ -68,6 +71,10 @@ export const getIssuebyID = ({id}) => {
         qty: element.QTY,
         uomCode: element.UOMCODE,
         keterangan: element.KETERANGAN,
+        locationType: element.LOCATIONTYPE,
+        locationCode: element.LOCATIONCODE,
+        jobCode: element.JOBCODE,
+        jobDescription: element.JOBDESCRIPTION,
         rejected: element.REJECTED,
         reason: element.REJECT_REASON
       });

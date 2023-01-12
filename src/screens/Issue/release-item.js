@@ -101,7 +101,19 @@ function ReleaseItem(props) {
         </Text>
       </View>
       <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.itemDescription}</Text>
-      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: {item.keterangan}</Text>
+      <View style={[styles.borderStyle, {
+        flexDirection: 'row',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 6,
+        justifyContent: 'space-between',
+      }]}>
+        <Text style={styles.subdetailText}>Location Type: {item.locationType}</Text>
+        <Text style={styles.subdetailText}>Location Code: {item.locationCode}</Text>
+        <Text style={styles.subdetailText}>Job Code: {item.jobCode}</Text>
+      </View>
     </TouchableOpacity>,
     [],
   )
@@ -113,7 +125,7 @@ function ReleaseItem(props) {
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header goBack={true} {...props} />
+      <Header goBack={true} title={itemData.no_order} {...props} />
       <View style={[{margin: 14, padding: 8, flexDirection: 'row', borderBottomWidth: .5}]}>
         <View style={{width: '25%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Tanggal</Text>
@@ -158,7 +170,12 @@ const styles = StyleSheet.create({
     marginTop: getStatusBarHeight(),
   },
   fontStyle: {
-    fontSize: 14
+    fontSize: 14,
+    color: '#000'
+  },
+  subdetailText: {
+    fontSize: 12,
+    color: '#000'
   },
   borderStyle: {
     borderColor: '#CACFD2',

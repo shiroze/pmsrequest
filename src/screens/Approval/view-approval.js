@@ -87,12 +87,12 @@ function ViewApproval(props) {
   )
   const renderItem = React.useCallback(
     ({ item, index }) => <TouchableOpacity style={[styles.itemCard, {flex: 1, backgroundColor: (item.rejected && item.rejected == 1) ? '#ffc7c7' : '#c7ffdc'}]} 
-      onPress={async () => {
+      onPress={() => {
         // reactotron.log(item);
         navigation.navigate(approvalStack.detail_approval, {id: itemData.no_order, item, approveStage: itemData.approve_stage});
       }}
     >
-      <View style={[styles.borderStyle, {flexDirection: 'row', marginBottom: 4, borderBottomWidth: .5}]}>
+      <View style={[styles.borderStyle, {flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4, borderBottomWidth: .5}]}>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.itemCode}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{branch_id}</Text>
         <Text style={[styles.fontStyle, {width: '25%'}]}>{item.warehouse}</Text>
@@ -102,7 +102,19 @@ function ViewApproval(props) {
         </Text>
       </View>
       <Text style={styles.fontStyle} numberOfLines={1}>Nama : {item.itemDescription}</Text>
-      <Text style={styles.fontStyle} numberOfLines={3}>Keterangan: {item.keterangan}</Text>
+      <View style={[styles.borderStyle, {
+        flexDirection: 'row',
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 6,
+        justifyContent: 'space-between',
+      }]}>
+        <Text style={styles.subdetailText}>Location Type: {item.locationType}</Text>
+        <Text style={styles.subdetailText}>Location Code: {item.locationCode}</Text>
+        <Text style={styles.subdetailText}>Job Code: {item.jobCode}</Text>
+      </View>
     </TouchableOpacity>,
     [],
   )
@@ -123,7 +135,7 @@ function ViewApproval(props) {
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header goBack={true} {...props} />
+      <Header title={itemData.no_order} goBack={true} {...props} />
       <View style={[{margin: 14, padding: 8, flexDirection: 'row', borderBottomWidth: .5}]}>
         <View style={{width: '25%'}}>
           <Text style={[styles.fontStyle, {fontWeight: 'bold'}]}>Tanggal</Text>
@@ -160,6 +172,10 @@ function ViewApproval(props) {
           />
         )
       }
+      {
+        // __DEV__ && 
+        // <Button title={'Test'} />
+      }
     </Container>
   )
 }
@@ -169,7 +185,12 @@ const styles = StyleSheet.create({
     marginTop: getStatusBarHeight(),
   },
   fontStyle: {
-    fontSize: 14
+    fontSize: 14,
+    color: '#000'
+  },
+  subdetailText: {
+    fontSize: 12,
+    color: '#000'
   },
   borderStyle: {
     borderColor: '#CACFD2',

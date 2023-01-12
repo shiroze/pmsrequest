@@ -31,7 +31,7 @@ function Order(props) {
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', async () => {
       setList(orderCart);
-      // reactotron.log(orderCart);
+      reactotron.log(orderCart);
     });
 
     // Return the function to unsubscribe from the event so it gets removed on unmount
@@ -48,10 +48,6 @@ function Order(props) {
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
-
-  React.useLayoutEffect(() => {
-    reactotron.log(showView);
-  }, [showView]);
 
   const toggleView = () => {
     setShowView(!showView);
@@ -77,6 +73,10 @@ function Order(props) {
               <Text style={styles.textStyle}>{"Kuantiti Tersedia: "+viewData.stock}</Text>
               <Text style={styles.textStyle}>{"Kuantiti Diminta: "+viewData.qty}</Text>
               <Text style={styles.textStyle}>{"Keterangan Penggunaan: "+viewData.keterangan}</Text>
+              <Text style={styles.textStyle}>{"Location Type: "+viewData.location_type}</Text>
+              <Text style={styles.textStyle}>{"Location Code: "+viewData.location_code}</Text>
+              <Text style={styles.textStyle}>{"Job Code: "+viewData.job_code}</Text>
+              <Text style={styles.textStyle}>{"Job Description: "+viewData.job_description}</Text>
               <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, justifyContent: 'center'}}>
                 <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '50%'}]}
                   onPress={() => {

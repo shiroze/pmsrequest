@@ -115,10 +115,14 @@ function Approval(props) {
             navigation.navigate(approvalStack.view_approval, {itemData: item, dtrans});
           }}
         >
-          <Text>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>
-          <Text>{item.no_order}</Text>
-          <Text>{item.requestBy}</Text>
-          <Text>{item.order_status}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>{item.no_order}</Text>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>{item.order_status}</Text>
+          </View>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 12}}>
+            <Text style={{fontSize: 16}}>{moment(dtrans, 'YYYY-MM-DD').format('ll')}</Text>
+            <Text style={{fontSize: 16}}>Diminta Oleh : {item.requestBy}</Text>
+          </View>
         </TouchableOpacity>
       )
     },
@@ -135,7 +139,7 @@ function Approval(props) {
 
   return (
     <Container isFullView style={styles.container} hideDrop={() => {Keyboard.dismiss()}}>
-      <Header {...props} />
+      <Header title={'Persetujuan'} {...props} />
       {
         <FlatList 
           data={approval}
@@ -187,14 +191,12 @@ const styles = StyleSheet.create({
     paddingVertical: 2
   },
   itemCard: {
-    flex:1, 
-    margin: 14, 
-    padding: 8,
+    width: width * 0.95,
+    padding: 12,
     backgroundColor: '#FFF',
-    borderRadius: 10, 
-    overflow: 'hidden',
-    borderWidth: 1, 
-    borderColor: '#FFF',
+    borderRadius: 10,
+    marginVertical: 8,
+    alignSelf: 'center',
     shadowColor: "#000000",
     shadowOffset: {
       width: 0,

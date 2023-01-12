@@ -82,6 +82,8 @@ function DetailApproval(props) {
       }
     });
 
+    reactotron.log("View Detail Approval",item);
+
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, [navigation]);
@@ -188,7 +190,7 @@ function DetailApproval(props) {
         <Text style={styles.textStyle}>Nama Barang: {data ? data.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Satuan: {data ? data.uomCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
         <Text style={styles.textStyle}>Kuantiti Tersedia: {data ? ((item.rejected && item.rejected == 1) ? data.stock : (data.stock + qty)) : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <View style={{flexDirection: 'row'}}>
+        <View>
           <Text style={styles.textStyle}>Kuantiti Diminta: </Text>
           <Input 
             disabled={!allow}
@@ -212,7 +214,7 @@ function DetailApproval(props) {
             keyboardType={'number-pad'}
           />
         </View>
-        <View style={{flexDirection: 'row'}}>
+        <View>
           <Text style={styles.textStyle}>Keterangan Penggunaan: </Text>
           <Input 
             disabled={!allow}
@@ -228,6 +230,10 @@ function DetailApproval(props) {
             selectTextOnFocus={true}
           />
         </View>
+        <Text style={styles.textStyle}>{"Location Type: "+item.locationType}</Text>
+        <Text style={styles.textStyle}>{"Location Code: "+item.locationCode}</Text>
+        <Text style={styles.textStyle}>{"Job Code: "+item.jobCode}</Text>
+        <Text style={styles.textStyle}>{"Job Description: "+item.jobDescription}</Text>
       </View>
       <View style={{flexDirection: 'row', justifyContent: 'space-between', margin: 16, display: !allow ? 'none' : 'flex'}}>
         <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#008031'}]} onPress={() => {
@@ -260,8 +266,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: (width * 0.95) - 24, 
-    margin: 18, 
-    // flexDirection: 'row'
+    margin: 18,
   },
   contentCard: {
     flex: 1

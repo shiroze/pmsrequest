@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { Text, View, StyleSheet, Dimensions, Keyboard, FlatList, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { Text, View, StyleSheet, Dimensions, Keyboard, FlatList, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
 
 import { Button } from '@rneui/base';
 import { Avatar, Icon, Input, Skeleton, Overlay } from '@rneui/themed';
@@ -86,31 +86,44 @@ function ViewItem(props) {
   };
 
   const add_to_cart = item => {
-    if (orderCart.some(val => item.itemCode === val.itemCode)) {
-      /**
-       * Membuang duplikat item
-       */
-      const newArrayList = [];
-      orderCart.forEach(obj => {
-        if (!newArrayList.some(o => o.itemCode === obj.itemCode)) {
-          newArrayList.push({...obj});
-        }
-      });
+    /**
+     * ! Tidak pakai ini karena duplikat item diperbolehkan
+     * ? Jika barang sama dipilih, maka qty akan ditimpa
+     * ? Jika barang berbeda dipilih, maka barang akan ditambahkan
+     */
+    // if (orderCart.some(val => item.itemCode === val.itemCode)) {
+    //   /**
+    //    * Membuang duplikat item
+    //    */
+    //   const newArrayList = [];
+    //   orderCart.forEach(obj => {
+    //     if (!newArrayList.some(o => o.itemCode === obj.itemCode)) {
+    //       newArrayList.push({...obj});
+    //     }
+    //   });
 
-      /**
-       * Update Qty jika barang yang sama dipilih
-       * Timpa Qty lama
-       */
-      let index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
-      newArrayList[index].qty = item.qty;
+    //   /**
+    //    * Update Qty jika barang yang sama dipilih
+    //    * Timpa Qty lama
+    //    */
+    //   let index = newArrayList.findIndex(o => o.itemCode == item.itemCode);
+    //   newArrayList[index].qty = item.qty;
 
-      dispatch(addToCart({payload:newArrayList}));
-    } else {
-      let listData = orderCart;
-      let cData = listData.concat(item);
+    //   dispatch(addToCart({payload:newArrayList}));
+    // } else {
+    //   let listData = orderCart;
+    //   let cData = listData.concat(item);
 
-      dispatch(addToCart({payload:cData}));
-    }
+    //   dispatch(addToCart({payload:cData}));
+    // }
+
+    /**
+     * ! Pakai ini karena duplikat item diperbolehkan
+     */
+    let listData = orderCart;
+    let cData = listData.concat(item);
+
+    dispatch(addToCart({payload:cData}));
   };
 
   const OrderConfirmation = () => {
@@ -124,6 +137,10 @@ function ViewItem(props) {
             <Text style={styles.textStyle}>{"Kuantiti Tersedia: " + data.stock}</Text>
             <Text style={styles.textStyle}>{"Kuantiti Diminta: "+qty}</Text>
             <Text style={styles.textStyle}>{"Keterangan Penggunaan: "+keterangan}</Text>
+            <Text style={styles.textStyle}>{"Location Type: "+location_type}</Text>
+            <Text style={styles.textStyle}>{"Location Code: "+location_code}</Text>
+            <Text style={styles.textStyle}>{"Job Code: "+job_code}</Text>
+            <Text style={styles.textStyle}>{"Job Description: "+job_description}</Text>
             <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between', alignContent: 'center', marginTop: 18}}>
               <TouchableOpacity style={[styles.btnStyle, {backgroundColor: '#ce0000', width: '40%'}]} onPress={toggleOverlay}>
                 <Text style={{color: '#FFF'}}>Batal</Text>
@@ -138,7 +155,7 @@ function ViewItem(props) {
                   qty,keterangan,
                   stock: data.stock,
                   warehouse: data.warehouse,
-                  location_type, location_code, job_code
+                  location_type, location_code, job_code, job_description
                 };
                 add_to_cart(item);
               }}>
@@ -162,82 +179,98 @@ function ViewItem(props) {
         <Icon name='arrow-right' type='font-awesome' size={14} />
         <Text style={{fontWeight: 'bold', fontSize: 14, width: width*0.6}} numberOfLines={1}>{data && data.itemDescription}</Text>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.textStyle}>Kode: {data ? data.itemCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={styles.textStyle}>Nama Barang: {data ? data.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={styles.textStyle}>Satuan: {data ? data.uomCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <Text style={styles.textStyle}>Kuantiti Tersedia: {data ? data.stock : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
-        <View>
-          <Text style={styles.textStyle}>Kuantiti Diminta: </Text>
-          <Input 
-            placeholder='Kuantiti Diminta'
-            containerStyle={{width: width*0.5}}
-            inputStyle={styles.inputStyle}
-            inputContainerStyle={styles.inputContainerStyle}
-            onChangeText={setQty}
-            value={qty}
-            onBlur={() => {
-              if(qty > data.stock) {
-                showMessage({
-                  message: "Kuantiti Diminta melebihi stock yang ada",
-                  icon: 'warning',
-                  type: 'info',
-                  duration: 2000
-                });
-                setQty(1);
-              }
-            }}
-            keyboardType={'number-pad'}
-          />
-        </View>
-        <View>
-          <Text style={styles.textStyle}>Location Type</Text>
-          <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 1, value: ''})}>
-            <Input
-              disabled
-              placeholder='Location Type'
+      <ScrollView>
+        <View style={styles.card}>
+          <Text style={styles.textStyle}>Kode: {data ? data.itemCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+          <Text style={styles.textStyle}>Nama Barang: {data ? data.itemDescription : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+          <Text style={styles.textStyle}>Satuan: {data ? data.uomCode : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+          <Text style={styles.textStyle}>Kuantiti Tersedia: {data ? data.stock : <Skeleton skeletonStyle={styles.skeletonStyle} width={width * 0.3} height={20} />}</Text>
+          <View>
+            <Text style={styles.textStyle}>Kuantiti Diminta: </Text>
+            <Input 
+              placeholder='Kuantiti Diminta'
               containerStyle={{width: width*0.5}}
               inputStyle={styles.inputStyle}
               inputContainerStyle={styles.inputContainerStyle}
-              value={location_type}
+              onChangeText={setQty}
+              value={qty}
+              onBlur={() => {
+                if(qty > data.stock) {
+                  showMessage({
+                    message: "Kuantiti Diminta melebihi stock yang ada",
+                    icon: 'warning',
+                    type: 'info',
+                    duration: 2000
+                  });
+                  setQty(1);
+                }
+              }}
+              keyboardType={'number-pad'}
             />
-          </TouchableOpacity>
-        </View>
-        <View>
-          <Text style={styles.textStyle}>Location Code</Text>
-          <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 2, value: location_type})}>
-            <Input
+          </View>
+          <View>
+            <Text style={styles.textStyle}>Keterangan Penggunaan: </Text>
+            <Input 
+              multiline
+              numberOfLines={5}
+              textAlignVertical={'top'}
+              containerStyle={{width: width*0.6}}
+              inputStyle={styles.inputStyle}
+              inputContainerStyle={[styles.inputContainerStyle, {height: (height * 0.08) + 12}]}
+              onChangeText={setKeterangan}
+              value={keterangan}
+              selectTextOnFocus={true}
+            />
+          </View>
+          <View>
+            <Text style={styles.textStyle}>Location Type</Text>
+            <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 1, value: ''})}>
+              <Input
+                disabled
+                placeholder='Location Type'
+                containerStyle={{width: width*0.5}}
+                inputStyle={styles.inputStyle}
+                inputContainerStyle={styles.inputContainerStyle}
+                value={location_type}
+              />
+            </TouchableOpacity>
+          </View>
+          <View>
+            <Text style={styles.textStyle}>Location Code</Text>
+            <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 2, value: location_type})}>
+              <Input
+                disabled
+                placeholder='Location Code'
+                containerStyle={{width: width*0.5}}
+                inputStyle={styles.inputStyle}
+                inputContainerStyle={styles.inputContainerStyle}
+                value={location_code}
+              />
+            </TouchableOpacity>
+          </View>
+          <View>
+            <Text style={styles.textStyle}>Job Code</Text>
+            <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 3, value: ''})}>
+              <Input
+                disabled
+                placeholder='Job Code'
+                containerStyle={{width: width*0.5}}
+                inputStyle={styles.inputStyle}
+                inputContainerStyle={styles.inputContainerStyle}
+                value={job_code}
+              />
+            </TouchableOpacity>
+            <Input 
               disabled
-              placeholder='Location Code'
+              placeholder='Job Description'
               containerStyle={{width: width*0.5}}
               inputStyle={styles.inputStyle}
               inputContainerStyle={styles.inputContainerStyle}
-              value={location_code}
+              value={job_description}
             />
-          </TouchableOpacity>
+          </View>
         </View>
-        <View>
-          <Text style={styles.textStyle}>Job Code</Text>
-          <TouchableOpacity onPress={() => navigation.navigate(homeStack.job_detail, {tipe: 3, value: ''})}>
-            <Input
-              disabled
-              placeholder='Job Code'
-              containerStyle={{width: width*0.5}}
-              inputStyle={styles.inputStyle}
-              inputContainerStyle={styles.inputContainerStyle}
-              value={job_code}
-            />
-          </TouchableOpacity>
-          <Input 
-            disabled
-            placeholder='Job Description'
-            containerStyle={{width: width*0.5}}
-            inputStyle={styles.inputStyle}
-            inputContainerStyle={styles.inputContainerStyle}
-            value={job_description}
-          />
-        </View>
-      </View>
+      </ScrollView>
       <TouchableOpacity style={styles.btnStyle} onPress={() => {
         if(qty != 0 && data.stock > qty) {
           toggleOverlay();

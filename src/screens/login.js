@@ -22,7 +22,7 @@ import { connect } from 'react-redux';
 
 import {signIn, localSignIn} from '~/modules/auth/actions';
 import * as Actions from '~/modules/auth/constants';
-import { authSelector,locationSelector } from '~/modules/auth/selectors';
+import { authSelector } from '~/modules/auth/selectors';
 import {currentModulesSelector, totalModuleDone, totalModule} from '~/modules/sync/selectors';
 
 import { SyncData } from '~/modules/sync/actions';
@@ -39,7 +39,6 @@ function Login(props) {
     navigation,
     dispatch,
     auth,
-    location,
     current,
     totalModule, totalModuleDone
   } = props;
@@ -96,14 +95,16 @@ function Login(props) {
         });
       }
       
-      if(location != "") {
-        setValue(location);
+      if(auth.location != "") {
+        setValue(auth.location);
       }
     });
 
+    reactotron.log(props);
+
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
-  }, [navigation, location]);
+  }, [navigation, auth.location]);
 
   React.useEffect(() => {
     setCurPatch(current);
@@ -304,7 +305,6 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
   return {
     auth: authSelector(state),
-    location: locationSelector(state),
     current: currentModulesSelector(state),
     totalModuleDone: totalModuleDone(state),
     totalModule: totalModule(state),

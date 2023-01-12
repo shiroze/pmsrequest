@@ -21,10 +21,3 @@ export function SyncUpload({branch_id}) {
     branch_id
   };
 }
-
-export function SyncStock({branch_id}) {
-  return {
-    type: Actions.SYNC_STOCK,
-    branch_id
-  };
-}
